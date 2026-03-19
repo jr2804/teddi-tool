@@ -1,0 +1,18 @@
+# type checker rules - see https://docs.astral.sh/ty/reference/rules/
+
+[environment]
+python-version = "3.11"
+python = "./.venv"
+
+[src]
+include = [
+    "src",
+    "tests",
+]
+exclude = [
+    ".venv",
+    ".config/skills",
+]
+
+[terminal]
+error-on-warning = true

@@ -1,0 +1,9 @@
+[tools]
+node = "latest"
+bun = "latest"
+
+[env]
+GITLAB_HOST = "forge.3gpp.org"
+
+[settings.npm]
+package_manager = "bun"
