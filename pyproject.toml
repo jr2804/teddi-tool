@@ -33,6 +33,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "ruff>=0.1.0",
     "ty>=0.1.0",
+    "undersort>=0.1.5",
 ]
 
 [project.scripts]
@@ -62,3 +63,14 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
 ]
+
+[tool.undersort]
+order = ["public", "protected", "private"]
+method_type_order = ["instance", "class", "static"]
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
