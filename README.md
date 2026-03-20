@@ -87,6 +87,7 @@ uv run pytest tests/teddi_mcp/test_parser.py -v
 ## Development
 
 See [AGENTS.md](AGENTS.md) for detailed development guidelines including:
+
 - Protocol-based abstraction patterns
 - HTTP caching with hishel
 - Sub-table parsing with TB grouping

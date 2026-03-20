@@ -167,6 +167,7 @@ def parse_teddi_response(html: str) -> list[TermResult]:
 **POST** `https://webapp.etsi.org/Teddi/search`
 
 **Parameters:**
+
 - `qWhatToSearch`: Term to search
 - `qWhereOption`: Search scope (1=abbreviations, 3=definitions, 2=both)
 - `qWhatOption`: Match pattern (1=alloccurrences, 2=startingwith, 3=endingwith, 4=exactmatch)
