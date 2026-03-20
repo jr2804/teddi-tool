@@ -1,0 +1,14 @@
+[tasks.add-mcp-servers]
+
+depends = ["upgrade-tools", "env-sync"]
+
+usage = '''
+arg "<ai_agent>" help="AI assistant to use: claude, gemini, copilot, opencode, ... see: https://github.com/neondatabase/add-mcp"
+'''
+shell = "pwsh -NoProfile -Command"
+run = [
+    'cls',
+    #'bun x add-mcp -y -a {{usage.ai_agent}} "grepai mcp-serve"',
+    'bun x add-mcp -y -a {{usage.ai_agent}} -n cytoscnpy-mcp "cytoscnpy mcp-server"',
+
+]

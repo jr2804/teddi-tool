@@ -1,0 +1,11 @@
+[tasks.format]
+description = "Format source code and tests"
+run = [
+    "uv run undersort corr_plot/ tests/ --exclude .config/",
+    "ruff check --select I --fix",                           # isort-equivalent sorting of imports
+    "ruff format corr_plot/ tests/ --exclude .config",
+]
+
+[tasks.format-md]
+description = "Format Markdown files"
+run = "uvx mdformat . --exclude .agents/"

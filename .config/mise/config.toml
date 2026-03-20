@@ -1,6 +1,10 @@
 [tools]
 node = "latest"
 bun = "latest"
+"github:djinn-soul/CytoScnPy" = "latest"
+"github:AlmogBaku/debug-skill" = "latest"
+"github:rtk-ai/rtk" = "latest"
+
 
 [env]
 GITLAB_HOST = "forge.3gpp.org"

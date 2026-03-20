@@ -1,0 +1,4 @@
+[tasks.analyze]
+# see: https://github.com/djinn-soul/CytoScnPy/blob/main/docs/usage.md
+description = "Run quality checks on source code and tests"
+run = "cytoscnpy . --secrets --danger --quality --include-tests"
