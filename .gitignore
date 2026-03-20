@@ -36,3 +36,7 @@ Thumbs.db
 
 # Type checker
 .ty/
+pyproject.toml
+uv.lock
+
+opencode.json
