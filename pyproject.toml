@@ -31,13 +31,15 @@ dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "ty>=0.1.0",
+    "ruff",
+    "ty",
     "undersort>=0.1.5",
 ]
 
 [project.scripts]
-teddi-mcp = "src.teddi_mcp.cli:app"
+teddi = "teddi_mcp.cli:run"
+teddi-mcp = "teddi_mcp.server:main"
+teddi-cli = "teddi_mcp.search_cli:run"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/teddi_mcp"]

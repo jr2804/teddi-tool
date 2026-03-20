@@ -22,31 +22,54 @@ uv pip install -e .
 
 ### CLI Usage
 
-```bash
-# Search for a term
-teddi-mcp search term "QoS" --search-pattern exactmatch
+Three executables are available:
 
-# List available technical bodies
-teddi-mcp search list-bodies
+```bash
+# Full CLI (search + server)
+teddi search-term "QoS" --pattern exactmatch
+teddi list-bodies
+teddi server
+
+# Search-only CLI (equivalent to `teddi search-*`)
+teddi-cli term "QoS" --pattern exactmatch
+teddi-cli list-bodies
+
+# MCP server only (equivalent to `teddi server`)
+teddi-mcp
+```
+
+**Equivalences:**
+
+| Command | Equivalent |
+|---------|------------|
+| `teddi-mcp` | `teddi server` |
+| `teddi-cli term ...` | `teddi search-term ...` |
+| `teddi-cli list-bodies` | `teddi list-bodies` |
+
+**Output formats:**
+
+```bash
+# Table output (default)
+teddi search-term "QoS"
 
 # JSON output
-teddi-mcp search term "QoS" --output json
+teddi search-term "QoS" --output json
 
 # ISON output (token-optimized)
-teddi-mcp search term "QoS" --output ison
+teddi search-term "QoS" --output ison
 
 # TOON output (token-optimized)
-teddi-mcp search term "QoS" --output toon
+teddi search-term "QoS" --output toon
 
 # Filter by technical bodies
-teddi-mcp search term "test" --technical-bodies "3gpp,etsi"
+teddi search-term "test" --technical-bodies "3gpp,etsi"
 ```
 
 ### MCP Server
 
 ```bash
 # Start the MCP server (stdio)
-teddi-mcp server
+teddi-mcp
 ```
 
 Then configure your AI agent client (e.g., Claude) to use this server:
@@ -55,8 +78,7 @@ Then configure your AI agent client (e.g., Claude) to use this server:
 {
   "mcpServers": {
     "teddi": {
-      "command": "teddi-mcp",
-      "args": ["server"]
+      "command": "teddi-mcp"
     }
   }
 }
@@ -68,7 +90,9 @@ Then configure your AI agent client (e.g., Claude) to use this server:
 - **client.py**: Core TeddiClient with Protocol-based abstraction
 - **parser.py**: HTML parsing with TB grouping logic
 - **http_client.py**: HTTP session manager with hishel caching
-- **cli.py**: Typer CLI interface
+- **search_utils.py**: Shared search logic for CLI executables
+- **cli.py**: Typer CLI for `teddi` executable (full CLI)
+- **search_cli.py**: Typer CLI for `teddi-cli` executable (search-only)
 - **server.py**: FastMCP 3.0 server implementation
 
 ## Testing

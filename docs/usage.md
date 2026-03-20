@@ -1,46 +1,69 @@
 # Usage
 
+## CLI Executables
+
+Three executables are provided:
+
+| Executable | Description | Equivalent |
+|------------|-------------|------------|
+| `teddi` | Full CLI: search commands + server | — |
+| `teddi-cli` | Search commands only | `teddi search-*` |
+| `teddi-mcp` | MCP server only (stdio) | `teddi server` |
+
+**Command Equivalences:**
+
+| Command | Equivalent |
+|---------|------------|
+| `teddi-mcp` | `teddi server` |
+| `teddi-cli term ...` | `teddi search-term ...` |
+| `teddi-cli list-bodies` | `teddi list-bodies` |
+
 ## CLI Commands
 
 ### Search Terms
 
 ```bash
-# Basic search
-teddi-mcp search term "QoS"
+# Basic search (full CLI)
+teddi search-term "QoS"
+
+# Search (search-only CLI)
+teddi-cli term "QoS"
 
 # Exact match
-teddi-mcp search term "QoS" --search-pattern exactmatch
+teddi search-term "QoS" --pattern exactmatch
 
 # Starting with
-teddi-mcp search term "QoS" --search-pattern startingwith
+teddi search-term "QoS" --pattern startingwith
 
 # Search in definitions only
-teddi-mcp search term "QoS" --search-in definitions
+teddi search-term "QoS" --scope definitions
 
 # Search in abbreviations only
-teddi-mcp search term "QoS" --search-in abbreviations
+teddi search-term "QoS" --scope abbreviations
 
 # Filter by technical bodies
-teddi-mcp search term "test" --technical-bodies "3gpp,etsi"
+teddi search-term "test" --technical-bodies "3gpp,etsi"
 
 # Output formats
-teddi-mcp search term "QoS" --output table
-teddi-mcp search term "QoS" --output json
-teddi-mcp search term "QoS" --output ison
-teddi-mcp search term "QoS" --output toon
+teddi search-term "QoS" --output table
+teddi search-term "QoS" --output json
+teddi search-term "QoS" --output ison
+teddi search-term "QoS" --output toon
 ```
 
 ### List Technical Bodies
 
 ```bash
-teddi-mcp search list-bodies
+teddi list-bodies
+# or
+teddi-cli list-bodies
 ```
 
 ### MCP Server
 
 ```bash
 # Start the MCP server (stdio mode)
-teddi-mcp server
+teddi-mcp
 ```
 
 ## Output Formats
