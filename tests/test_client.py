@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
 from src.teddi_mcp.client import TeddiClient
 from src.teddi_mcp.models import SearchIn, SearchPattern, SearchRequest, TechnicalBody
 
