@@ -1,7 +1,6 @@
----
-name: mcp-teddi
-description: MCP usage for ETSI TEDDI (Terms and Definitions Database Interactive) through the teddi-mcp server. Use when querying terms/abbreviations, listing technical bodies, validating technical body codes, or retrieving exact term definitions from Copilot chat tools.
----
+______________________________________________________________________
+
+## name: mcp-teddi description: MCP usage for ETSI TEDDI (Terms and Definitions Database Interactive) through the teddi-mcp server. Use when querying terms/abbreviations, listing technical bodies, validating technical body codes, or retrieving exact term definitions from Copilot chat tools.
 
 # MCP Server: TEDDI
 
@@ -26,10 +25,10 @@ Use these teddi MCP tools:
 ## Recommended Workflow
 
 1. Validate or discover technical body codes first with `list_technical_bodies`.
-2. Run `search_teddi` with explicit `search_in` and `search_pattern`.
-3. Apply `technical_bodies` filtering only with known valid codes.
-4. If the user wants one specific entry, use `get_term_info` for exact lookup.
-5. Summarize results with:
+1. Run `search_teddi` with explicit `search_in` and `search_pattern`.
+1. Apply `technical_bodies` filtering only with known valid codes.
+1. If the user wants one specific entry, use `get_term_info` for exact lookup.
+1. Summarize results with:
    - concise definition,
    - body-specific differences,
    - document references (spec + URL) when available.
@@ -72,6 +71,6 @@ When no results are returned:
 For explanations, include:
 
 1. A one-line plain-language meaning.
-2. Context of use (for example, telecom testing, standards terminology).
-3. Differences by technical body.
-4. Optional references to source specs from TEDDI response data.
+1. Context of use (for example, telecom testing, standards terminology).
+1. Differences by technical body.
+1. Optional references to source specs from TEDDI response data.

@@ -1,7 +1,6 @@
----
-name: cli-teddi
-description: CLI usage for teddi-mcp from source in this repository. Use when running TEDDI term searches, listing technical bodies, or starting the TEDDI MCP server from terminal with uv run commands.
----
+______________________________________________________________________
+
+## name: cli-teddi description: CLI usage for teddi-mcp from source in this repository. Use when running TEDDI term searches, listing technical bodies, or starting the TEDDI MCP server from terminal with uv run commands.
 
 # CLI: teddi-mcp
 
@@ -93,14 +92,14 @@ uv run -m teddi_mcp
 If a technical body is reported unknown:
 
 1. Run `search list-bodies` and use returned codes exactly.
-2. Retry with normalized lowercase codes.
+1. Retry with normalized lowercase codes.
 
 If exact match returns no rows:
 
 1. Retry using uppercase term.
-2. Retry with `--search-pattern alloccurrences`.
+1. Retry with `--search-pattern alloccurrences`.
 
 If server tools do not refresh after code changes:
 
 1. Reload VS Code window.
-2. Re-run the configured MCP command from `.vscode/mcp.json`.
+1. Re-run the configured MCP command from `.vscode/mcp.json`.
