@@ -1,6 +1,6 @@
 """Tests for TeddiClient."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -32,7 +32,7 @@ class TestTeddiClient:
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.text = mock_html
-        mock_response.raise_for_status = AsyncMock()
+        mock_response.raise_for_status = Mock()
         mock_client.post.return_value = mock_response
 
         client = TeddiClient(client=mock_client)
@@ -60,7 +60,7 @@ class TestTeddiClient:
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.text = mock_html
-        mock_response.raise_for_status = AsyncMock()
+        mock_response.raise_for_status = Mock()
         mock_client.post.return_value = mock_response
 
         client = TeddiClient(client=mock_client)
@@ -93,6 +93,7 @@ class TestTeddiClient:
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.text = mock_html
+        mock_response.raise_for_status = Mock()
         mock_client.post.return_value = mock_response
 
         client = TeddiClient(client=mock_client)
@@ -117,7 +118,9 @@ class TestTeddiClient:
         """Test using TeddiClient as async context manager."""
         with patch("src.teddi_mcp.client.create_cached_teddi_async_client") as mock_create:
             mock_client = AsyncMock()
-            mock_client.post.return_value = AsyncMock(text="<table></table>")
+            mock_response = AsyncMock(text="<table></table>")
+            mock_response.raise_for_status = Mock()
+            mock_client.post.return_value = mock_response
             mock_create.return_value = mock_client
 
             async with TeddiClient() as client:
@@ -132,7 +135,7 @@ class TestTeddiClient:
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.content = b"PDF content"
-        mock_response.raise_for_status = AsyncMock()
+        mock_response.raise_for_status = Mock()
         mock_client.get.return_value = mock_response
 
         client = TeddiClient(client=mock_client)
