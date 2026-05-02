@@ -9,13 +9,13 @@
    cd teddi-mcp
    ```
 
-1. Sync dependencies:
+2. Sync dependencies:
 
    ```bash
    uv sync --all-extras
    ```
 
-1. Install pre-commit hooks:
+3. Install pre-commit hooks:
 
    ```bash
    uv run pre-commit install
@@ -104,14 +104,14 @@ Both expose identical tools:
 ### New Search Filter
 
 1. Define enum in `models.py`
-1. Update `SearchRequest` dataclass
-1. Update HTTP call in `client.py`
-1. Update CLI in `cli.py`
-1. Update MCP server in `server.py`
-1. Add tests
+2. Update `SearchRequest` dataclass
+3. Update HTTP call in `client.py`
+4. Update CLI in `cli.py`
+5. Update MCP server in `server.py`
+6. Add tests
 
 ## Implementation Notes
 
 1. **TEDDI HTML-Driven**: Endpoint reverse-engineered. Parser may need updates if TEDDI UI changes.
-1. **Async-First**: All core methods async. Use `asyncio.run()` for sync wrappers.
-1. **Cache Validation**: Tests auto-cache in `tests/.cache/teddi_http.sqlite3`.
+2. **Async-First**: All core methods async. Use `asyncio.run()` for sync wrappers.
+3. **Cache Validation**: Tests auto-cache in `tests/.cache/teddi_http.sqlite3`.
