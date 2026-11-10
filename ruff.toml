@@ -1,9 +1,8 @@
 
 unsafe-fixes = true
 exclude = [".venv", ".config/skills"]
-target-version = "py311"
+target-version = "py313"
 line-length = 100
-fix = true
 
 [lint]
 preview = true

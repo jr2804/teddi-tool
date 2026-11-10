@@ -1,11 +1,11 @@
 [tasks.lint]
 description = "Lint source code and tests (no fixes)"
-run = "ruff check corr_plot/ tests/ packages/"
+run = "uv run ruff check src/ tests/"
 
 [tasks.lint-fix]
 description = "Lint source code and tests and fix safe issues"
-run = "ruff check --fix corr_plot/ tests/ packages/"
+run = "uv run ruff check --fix src/ tests/"
 
 [tasks.lint-fix-unsafe]
 description = "Lint source code and tests and fix safe and unsafe issues"
-run = "ruff check --fix --unsafe-fixes corr_plot/ tests/ packages/"
+run = "uv run ruff check --fix --unsafe-fixes src/ tests/"

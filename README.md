@@ -110,13 +110,12 @@ uv run pytest tests/teddi_mcp/test_parser.py -v
 
 ## Development
 
-See [AGENTS.md](AGENTS.md) for detailed development guidelines including:
+See [docs/development.md](docs/development.md) for setup, tests, and code
+quality. Area contracts live next to the code:
 
-- Protocol-based abstraction patterns
-- HTTP caching with hishel
-- Sub-table parsing with TB grouping
-- Dual API design (MCP + CLI)
-- Adding new features
+- [`src/teddi_mcp/AGENTS.md`](src/teddi_mcp/AGENTS.md) — client, parser, CLI/MCP surface, adding features
+- [`tests/AGENTS.md`](tests/AGENTS.md) — test conventions
+- [`.agents/ONBOARDING.md`](.agents/ONBOARDING.md) — entry points and commands
 
 ## License
 
