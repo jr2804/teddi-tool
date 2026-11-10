@@ -36,7 +36,22 @@ Thumbs.db
 
 # Type checker
 .ty/
-pyproject.toml
+
 uv.lock
 
 opencode.json
+
+# Keep .agents/ DOX .md files tracked (override any blanket ignore)
+# State files, their detail subdirectories, and history stay versioned;
+# everything else tools drop under .agents/ stays ignored.
+/.agents/*
+!/.agents/*.md
+!/.agents/files/
+!/.agents/policies/
+!/.agents/tools/
+!/.agents/maintenance/
+!/.agents/history/
+!/.agents/history/**
+
+# Implementation plans — mutable working artifacts, never committed
+/.agents/plans/
