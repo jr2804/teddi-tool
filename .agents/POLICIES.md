@@ -77,9 +77,8 @@ uv run ty check
 `ty.toml` sets `error-on-warning = true`. Markdown formatting
 (`mise run format-md`) is optional and currently has no CI gate.
 
-Gaps as of 2026-11-10: `mise run lint` / `lint-fix*` still target
-`corr_plot/ tests/ packages/` (stale paths), and there is no `test` or
-`typecheck` mise task. Use the `uv run` commands above.
+Gaps as of 2026-11-10: there is no `test` or `typecheck` mise task, so use
+the `uv run` commands above. `mise run lint` targets `src/ tests/`.
 
 ## Response format
 

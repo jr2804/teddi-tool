@@ -52,8 +52,8 @@ If this file grows past its size budget, split detail into
 | ------- | ------- |
 | `mise run format` | `undersort` + ruff import sort + `ruff format` on `src/ tests/` |
 | `mise run format-md` | `mdformat` across the repo, excluding `.config/` |
-| `mise run lint` | `ruff check` (stale target paths — see `.agents/POLICIES.md` → Verification) |
-| `mise run lint-fix` / `lint-fix-unsafe` | `ruff check --fix` / `--unsafe-fixes` (same stale paths) |
+| `mise run lint` | `ruff check src/ tests/` |
+| `mise run lint-fix` / `lint-fix-unsafe` | `ruff check --fix` / `--unsafe-fixes` on `src/ tests/` |
 | `mise run analyze` | `cytoscnpy . --secrets --danger --quality --include-tests` |
 | `mise run env-sync` | `uv sync -U --dev --all-extras --all-groups` |
 | `mise run upgrade-tools` | `mise install && mise up && mise prune` |

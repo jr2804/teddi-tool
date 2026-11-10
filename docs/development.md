@@ -89,7 +89,7 @@ class TeddiSource(Protocol):
 Requests go through `create_cached_teddi_async_client()`:
 
 - SQLite store: `.cache/teddi_http.sqlite3` (or the given `cache_dir`)
-- TTL: 2 hours, refreshed on access
+- TTL: 2 hours, fixed when the entry is written
 - 30 s timeout, browser User-Agent
 
 There is no retry transport; failed requests surface as `httpx.HTTPError`.

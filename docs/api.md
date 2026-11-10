@@ -133,14 +133,14 @@ Creates an async HTTP client with caching.
 ```python
 def create_cached_teddi_async_client(
     cache_dir: Path | None = None,
-    ttl_seconds: int = 7200,
+    cache_ttl: int = 7200,
 ) -> httpx.AsyncClient:
     """
     Create async HTTP client with hishel caching.
-    
+
     - SQLite cache in `.cache/teddi_http.sqlite3`
-    - TTL: 2 hours (7200 seconds) by default
-    - Auto-retries on 429, 500, 502, 503, 504
+    - TTL: 2 hours (7200 seconds) by default, fixed at write time
+    - No retry transport; HTTP failures surface as `httpx.HTTPError`
     """
 ```
 

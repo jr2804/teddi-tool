@@ -18,11 +18,11 @@ owns tooling and path inventories.
 - `TeddiClient` is an async context manager: `__aenter__` creates the cached httpx client only when none was injected, and `__aexit__` closes only a client it owns (`src/teddi_mcp/client.py:93`–`104`). `_get_client()` raises `RuntimeError` outside the context.
 - Search request shape (`src/teddi_mcp/client.py:122`–`145`): `POST TEDDI_SEARCH_URL` (`https://webapp.etsi.org/Teddi/Main.asp`) with form fields `qWhatToSearch`, `qWhereOption` (from `SEARCH_IN_TO_PARAM`), `qWhatOption` (from `SEARCH_PATTERN_TO_PARAM`), `qShowTBs` (upper-cased `TechnicalBody` values joined by comma, `ALL` for `TechnicalBody.ALL`), plus `btnSearch.x` / `btnSearch.y`.
 - `get_available_technical_bodies()` returns the static `TechnicalBody` enum minus `ALL` (`src/teddi_mcp/client.py:157`–`166`). TEDDI is not queried — enum additions must match real TEDDI TB codes.
-- Cache contract (`src/teddi_mcp/http_client.py:13`–`56`): hishel `AsyncSqliteStorage`, `.cache/teddi_http.sqlite3` by default, `cache_ttl=7200`, refresh on access, 30 s timeout, browser User-Agent. There is no retry transport.
+- Cache contract (`src/teddi_mcp/http_client.py:13`): hishel `AsyncSqliteStorage`, `.cache/teddi_http.sqlite3` by default, `cache_ttl=7200` fixed at write time (hishel 2.x has no refresh-on-access), 30 s timeout, browser User-Agent. There is no retry transport.
 - Parser (`src/teddi_mcp/parser.py`): `parse_teddi_response(html)` returns `list[TermResult]`; an empty TB cell inherits the previous row's technical body; document sub-tables become `DocumentRef` entries.
 - Output path: `build_results_payload` → `serialize_payload` (`OutputFormat`: table default, `json`, `ison`, `toon`) in `src/teddi_mcp/search_utils.py`; `render_table` uses `rich`.
-- MCP tools (`src/teddi_mcp/server.py`): `search_teddi`, `get_term_info`, `list_technical_bodies`. `fetch_document()` exists on the client but is intentionally not exposed as a tool or command.
-- CLI surface: `teddi search-term|list-bodies|server` (`src/teddi_mcp/cli.py`), `teddi-cli term|list-bodies` (`src/teddi_mcp/search_cli.py`). Both delegate to `search_utils`.
+- MCP tools (`src/teddi_mcp/server.py`): `search_teddi`, `get_term_info`, `list_technical_bodies`. Payload shape and TB-filter parsing come from `search_utils` (`build_results_payload`, `parse_technical_bodies`) — do not re-implement them here. `fetch_document()` exists on the client but is intentionally not exposed as a tool or command.
+- CLI surface: `teddi search-term|list-bodies|server` (`src/teddi_mcp/cli.py`), `teddi-cli term|list-bodies` (`src/teddi_mcp/search_cli.py`). Both delegate to `search_utils` and share option aliases from `src/teddi_mcp/args.py`.
 
 ## Work Guidance
 
