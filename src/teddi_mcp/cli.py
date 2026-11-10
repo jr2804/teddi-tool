@@ -4,6 +4,13 @@ import asyncio
 
 import typer
 
+from teddi_mcp.args import (
+    OutputOption,
+    PatternOption,
+    ScopeOption,
+    TechnicalBodiesOption,
+    TermArgument,
+)
 from teddi_mcp.models import OutputFormat, SearchIn, SearchPattern
 from teddi_mcp.search_utils import (
     build_results_payload,
@@ -20,31 +27,11 @@ app = typer.Typer(help="TEDDI CLI - search and MCP server")
 
 @app.command("search-term")
 def search_term(
-    term: str,
-    scope: SearchIn = typer.Option(
-        SearchIn.BOTH,
-        "--scope",
-        "-s",
-        help="Search scope: abbreviations, definitions, or both",
-    ),
-    pattern: SearchPattern = typer.Option(
-        SearchPattern.ALL_OCCURRENCES,
-        "--pattern",
-        "-p",
-        help="Pattern matching: exactmatch, startingwith, endingwith, alloccurrences",
-    ),
-    technical_bodies: str | None = typer.Option(
-        None,
-        "--technical-bodies",
-        "-t",
-        help="Comma-separated TB names to filter by (e.g., '3gpp,etsi')",
-    ),
-    output: OutputFormat = typer.Option(
-        OutputFormat.TABLE,
-        "--output",
-        "-o",
-        help="Output format: json, ison, toon, table",
-    ),
+    term: TermArgument,
+    scope: ScopeOption = SearchIn.BOTH,
+    pattern: PatternOption = SearchPattern.ALL_OCCURRENCES,
+    technical_bodies: TechnicalBodiesOption = None,
+    output: OutputOption = OutputFormat.TABLE,
 ) -> None:
     """Search for a term in TEDDI."""
     request, response = asyncio.run(execute_search(term, scope, pattern, technical_bodies))

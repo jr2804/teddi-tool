@@ -6,39 +6,32 @@ import typer
 
 from teddi_mcp.models import OutputFormat, SearchIn, SearchPattern
 
-_ = Annotated[
-    str,
-    typer.Argument(..., help="Term to search for"),
-]
-_ = Annotated[
+TermArgument = Annotated[str, typer.Argument(help="Term to search for")]
+
+ScopeOption = Annotated[
     SearchIn,
-    typer.Option(
-        SearchIn.BOTH,
-        "--search-in",
-        help="Search scope: abbreviations, definitions, or both",
-    ),
+    typer.Option("--scope", "-s", help="Search scope: abbreviations, definitions, or both"),
 ]
-_ = Annotated[
+
+PatternOption = Annotated[
     SearchPattern,
     typer.Option(
-        SearchPattern.ALL_OCCURRENCES,
-        "--search-pattern",
-        help="Pattern matching: exactmatch, startingwith, endingwith, alloccurrences. Default: alloccurrences",
+        "--pattern",
+        "-p",
+        help="Pattern matching: exactmatch, startingwith, endingwith, alloccurrences",
     ),
 ]
-_ = Annotated[
+
+TechnicalBodiesOption = Annotated[
     str | None,
     typer.Option(
-        None,
         "--technical-bodies",
-        help="Comma-separated TB names to filter by (e.g., '3gpp,etsi'). Default: all",
+        "-t",
+        help="Comma-separated TB names to filter by (e.g., '3gpp,etsi')",
     ),
 ]
-_ = Annotated[
+
+OutputOption = Annotated[
     OutputFormat,
-    typer.Option(
-        OutputFormat.TABLE,
-        "--output",
-        help="Output format: json, ison, toon, table",
-    ),
+    typer.Option("--output", "-o", help="Output format: json, ison, toon, table"),
 ]

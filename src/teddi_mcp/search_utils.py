@@ -1,6 +1,5 @@
 """Shared search logic for TEDDI CLI commands."""
 
-import asyncio
 import json
 import logging
 from typing import Any
@@ -108,6 +107,32 @@ def render_table(term: str, response: SearchResponse) -> None:
     console.print(table)
 
 
+def parse_technical_bodies(tb_filter_str: str | None) -> list[TechnicalBody] | None:
+    """Parse a comma-separated technical-body filter into enum values.
+
+    Args:
+        tb_filter_str: Optional comma-separated list (e.g. ``"all"``).
+
+    Returns:
+        Parsed technical bodies, or None when the filter is empty.
+
+    Raises:
+        ValueError: If any entry is not a supported technical body.
+    """
+    if not tb_filter_str:
+        return None
+
+    values = [value.strip().lower() for value in tb_filter_str.split(",") if value.strip()]
+    if not values:
+        return None
+
+    try:
+        return [TechnicalBody(value) for value in values]
+    except ValueError as exc:
+        valid = ", ".join(tb.value for tb in TechnicalBody)
+        raise ValueError(f"Invalid technical_bodies value. Supported values: {valid}") from exc
+
+
 async def execute_search(
     term: str,
     search_scope: SearchIn,
@@ -115,16 +140,11 @@ async def execute_search(
     tb_filter_str: str | None,
 ) -> tuple[SearchRequest, SearchResponse]:
     """Execute search and return request/response pair."""
-    tb_filter: list[TechnicalBody] | None = None
-    if tb_filter_str:
-        tb_values = [v.strip().lower() for v in tb_filter_str.split(",")]
-        tb_filter = [TechnicalBody(v) for v in tb_values]
-
     request = SearchRequest(
         term=term,
         search_in=search_scope,
         search_pattern=search_pattern,
-        technical_bodies=tb_filter,
+        technical_bodies=parse_technical_bodies(tb_filter_str),
     )
 
     async with TeddiClient() as client:
