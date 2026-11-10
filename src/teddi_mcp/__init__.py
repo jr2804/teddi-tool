@@ -13,13 +13,13 @@ from teddi_mcp.models import (
 
 __version__ = "0.1.0"
 __all__ = [
-    "TeddiClient",
-    "TeddiSource",
     "DocumentRef",
     "SearchIn",
     "SearchPattern",
     "SearchRequest",
     "SearchResponse",
     "TechnicalBody",
+    "TeddiClient",
+    "TeddiSource",
     "TermResult",
 ]

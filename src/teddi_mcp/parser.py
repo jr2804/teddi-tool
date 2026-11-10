@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 TEDDI_BASE_URL = "https://webapp.etsi.org"
 
+_EXTERNAL_URL_PREFIXES = ("http://", "https://", "//")
+
 
 def parse_teddi_response(html_content: str) -> list[TermResult]:
     """Parse TEDDI HTML response to extract search results.
@@ -27,68 +29,62 @@ def parse_teddi_response(html_content: str) -> list[TermResult]:
         ValueError: If HTML structure cannot be parsed.
     """
     soup = BeautifulSoup(html_content, "html.parser")
-    results = []
 
-    # Find main results table: typically has columns: Term | Description | Declared in document(s)
+    results_table = _find_results_table(soup)
+    if results_table is None:
+        return []
+
+    return _extract_results(results_table)
+
+
+def _find_results_table(soup: BeautifulSoup) -> Tag | None:
+    """Locate the results table in a parsed TEDDI page.
+
+    Prefers the table whose first column header contains "term"; falls back to
+    the first table with more than a few rows (layout tables are small).
+
+    Args:
+        soup: Parsed TEDDI response document.
+
+    Returns:
+        The results table, or None when the page contains no usable table.
+    """
     tables = soup.find_all("table")
     if not tables:
         logger.warning("No tables found in TEDDI response HTML")
-        return []
-
-    results_table = None
-    header_row_idx = None
+        return None
 
     # Search all tables for one with a header row containing "Term"
     for table in tables:
-        rows = table.find_all("tr")
-        if not rows:
-            continue
-
-        # Look for header row in all rows (not just first, due to form navigation)
-        for row_idx, row in enumerate(rows):
+        for row in table.find_all("tr"):
             cells = row.find_all(["th", "td"])
             if len(cells) < 3:
                 continue
+            if "term" in cells[0].get_text(strip=True).lower():
+                return table
 
-            cell_texts_lower = [c.get_text(strip=True).lower() for c in cells[:3]]
+    # Fall back to the first table that looks like content rather than layout
+    for table in tables:
+        if len(table.find_all("tr")) > 5:
+            return table
 
-            # Check if this row is the header (contains "term")
-            if "term" in cell_texts_lower[0]:
-                results_table = table
-                header_row_idx = row_idx
-                break
+    return None
 
-        if results_table:
-            break
 
-    # Fall back to first table with multiple rows if not found
-    if not results_table and len(tables) > 0:
-        # Use first table with more than just layout rows
-        for table in tables:
-            rows = table.find_all("tr")
-            if len(rows) > 5:  # Likely has content
-                results_table = table
-                header_row_idx = None
-                break
+def _extract_results(table: Tag) -> list[TermResult]:
+    """Extract one TermResult per data row of the results table.
 
-    if not results_table:
-        return []
+    Args:
+        table: Results table found by `_find_results_table`.
 
-    # Extract results starting after header row
-    rows = results_table.find_all("tr")
-    if header_row_idx is not None:
-        header_row_idx + 1
-    else:
-        # Try to find first data row by skipping form/navigation rows
-        max(1, len(rows) // 6)  # Skip likely navigation rows
+    Returns:
+        Term results in document order; the header row is skipped.
+    """
+    results: list[TermResult] = []
 
-    i = 0
-    while i < len(rows):
-        row = rows[i]
+    for row in table.find_all("tr"):
         cells = row.find_all(["td", "th"])
-
         if len(cells) < 3:
-            i += 1
             continue
 
         term_cell = cells[0].get_text(strip=True)
@@ -96,25 +92,19 @@ def parse_teddi_response(html_content: str) -> list[TermResult]:
 
         # Skip the header row if it was included
         if term_cell.lower() == "term" and description_cell.lower() == "description":
-            i += 1
             continue
-
-        documents_cell = cells[2]  # May contain nested table
 
         if not term_cell or not description_cell:
-            i += 1
             continue
 
-        # Parse nested table in "Declared in document(s)" column
-        documents = _parse_document_table(documents_cell)
-
-        result = TermResult(
-            term=term_cell,
-            description=description_cell,
-            documents=documents,
+        # Third column may contain a nested table of document references
+        results.append(
+            TermResult(
+                term=term_cell,
+                description=description_cell,
+                documents=_parse_document_table(cells[2]),
+            )
         )
-        results.append(result)
-        i += 1
 
     return results
 
@@ -131,17 +121,16 @@ def _parse_document_table(cell_content: Tag) -> list[DocumentRef]:
     Returns:
         List of DocumentRef objects with TB grouping applied.
     """
-    documents = []
+    documents: list[DocumentRef] = []
     nested_table = cell_content.find("table")
 
     if not nested_table:
         # No nested table, return empty
         return documents
 
-    rows = nested_table.find_all("tr")
     last_tb = ""  # Track last seen technical body for grouping
 
-    for row in rows:
+    for row in nested_table.find_all("tr"):
         cells = row.find_all(["td", "th"])
 
         if len(cells) < 2:
@@ -154,9 +143,7 @@ def _parse_document_table(cell_content: Tag) -> list[DocumentRef]:
             last_tb = tb_cell
 
         # Second cell contains link or is empty
-        doc_cell = cells[1]
-        link = doc_cell.find("a")
-
+        link = cells[1].find("a")
         if not link:
             # No link in this row, skip
             continue
@@ -165,16 +152,31 @@ def _parse_document_table(cell_content: Tag) -> list[DocumentRef]:
         if not spec_text:
             continue
 
-        url = link.get("href", "")
-        # Resolve relative URLs
-        if url and not url.startswith(("http://", "https://", "//")):
-            url = urljoin(TEDDI_BASE_URL, url)
-
-        doc_ref = DocumentRef(
-            technical_body=last_tb,
-            specification=spec_text,
-            url=url,
+        documents.append(
+            DocumentRef(
+                technical_body=last_tb,
+                specification=spec_text,
+                url=_resolve_url(link),
+            )
         )
-        documents.append(doc_ref)
 
     return documents
+
+
+def _resolve_url(link: Tag) -> str:
+    """Return the absolute document URL for a link element.
+
+    Args:
+        link: Anchor element from a document sub-table.
+
+    Returns:
+        Absolute URL, or an empty string when the anchor has no href.
+    """
+    href = link.get("href")
+    url = href if isinstance(href, str) else ""
+
+    # Resolve relative URLs against the TEDDI host
+    if url and not url.startswith(_EXTERNAL_URL_PREFIXES):
+        return urljoin(TEDDI_BASE_URL, url)
+
+    return url

@@ -154,7 +154,8 @@ class TeddiClient:
             total_count=len(results),
         )
 
-    async def get_available_technical_bodies(self) -> list[TechnicalBody]:
+    @staticmethod
+    async def get_available_technical_bodies() -> list[TechnicalBody]:
         """Get list of available technical bodies.
 
         Currently returns static list of supported TBs.

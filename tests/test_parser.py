@@ -160,7 +160,10 @@ class TestParseTermResult:
                 <td>Test definition</td>
                 <td>
                     <table>
-                        <tr><td>3GPP</td><td><a href="https://example.com/ts-24-008">TS 24.008</a></td></tr>
+                        <tr>
+                            <td>3GPP</td>
+                            <td><a href="https://example.com/ts-24-008">TS 24.008</a></td>
+                        </tr>
                     </table>
                 </td>
             </tr>

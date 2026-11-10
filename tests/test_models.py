@@ -95,7 +95,9 @@ class TestDataClasses:
         assert request.term == "QoS"
         assert request.search_in == SearchIn.DEFINITIONS
         assert request.search_pattern == SearchPattern.STARTING_WITH
+        assert request.technical_bodies is not None
         assert len(request.technical_bodies) == 1
+        assert request.technical_bodies[0] == TechnicalBody.ALL
 
     def test_search_response_creation(self) -> None:
         """Test SearchResponse creation with results."""

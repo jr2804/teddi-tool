@@ -109,9 +109,9 @@ class TestTeddiClient:
     async def test_search_without_client_raises_error(self) -> None:
         """Test that search without initializing client raises error."""
         client = TeddiClient()
+        request = SearchRequest(term="test")
 
         with pytest.raises(RuntimeError, match="Client not initialized"):
-            request = SearchRequest(term="test")
             await client.search_terms(request)
 
     async def test_context_manager_usage(self) -> None:
