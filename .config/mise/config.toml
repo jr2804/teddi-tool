@@ -1,9 +1,7 @@
 [tools]
-node = "latest"
+#node = "latest"
 bun = "latest"
-"github:djinn-soul/CytoScnPy" = "latest"
-"github:AlmogBaku/debug-skill" = "latest"
-"github:rtk-ai/rtk" = "latest"
+
 
 
 [env]
