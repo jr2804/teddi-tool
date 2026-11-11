@@ -96,7 +96,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: dist
-        path: dist/*
+        path: |
+          dist/*.whl
+          dist/*.tar.gz
 
     - name: Generate release notes
       env:
@@ -113,11 +115,12 @@ jobs:
         tag_name: ${{ steps.version.outputs.version }}
         name: ${{ steps.version.outputs.version }}
         body_path: RELEASE_NOTES.md
-        files: dist/*
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
 
   pypi:
     needs: release
-    if: needs.release.outputs.needs_tag == 'true'
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -126,11 +129,25 @@ jobs:
       id-token: write
 
     steps:
+    - name: Check whether the version is already on PyPI
+      id: published
+      env:
+        VERSION: ${{ needs.release.outputs.version }}
+      run: |
+        if curl -fsS "https://pypi.org/pypi/teddi-tool/${VERSION}/json" >/dev/null; then
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+          echo "teddi-tool ${VERSION} is already published; skipping."
+        else
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Download distributions
+      if: steps.published.outputs.skip != 'true'
       uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist
 
     - name: Publish to PyPI
+      if: steps.published.outputs.skip != 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
