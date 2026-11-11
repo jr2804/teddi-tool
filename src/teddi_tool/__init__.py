@@ -3,7 +3,6 @@
 from teddi_tool.__about__ import __version__
 from teddi_tool.client import TeddiClient, TeddiSource
 from teddi_tool.models import (
-    TECHNICAL_BODY_CODES,
     DocumentRef,
     OutputFormat,
     SearchIn,
@@ -14,7 +13,6 @@ from teddi_tool.models import (
 )
 
 __all__ = [
-    "TECHNICAL_BODY_CODES",
     "DocumentRef",
     "OutputFormat",
     "SearchIn",

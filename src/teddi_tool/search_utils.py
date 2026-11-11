@@ -10,9 +10,8 @@ from rich.console import Console
 from rich.table import Table
 from toon_format import encode as toon_encode
 
-from teddi_tool.client import TeddiClient
+from teddi_tool.client import SEARCH_CACHE_TTL, TEDDI_MENU_CACHE_TTL, TeddiClient
 from teddi_tool.models import (
-    TECHNICAL_BODY_CODES,
     OutputFormat,
     SearchIn,
     SearchPattern,
@@ -112,35 +111,66 @@ async def execute_search(
     search_scope: SearchIn,
     search_pattern: SearchPattern,
     tb_filter_str: str | None,
+    *,
+    cache_ttl: int = SEARCH_CACHE_TTL,
+    menu_cache_ttl: int = TEDDI_MENU_CACHE_TTL,
 ) -> tuple[SearchRequest, SearchResponse]:
-    """Execute search and return request/response pair."""
-    request = SearchRequest(
-        term=term,
-        search_in=search_scope,
-        search_pattern=search_pattern,
-        technical_bodies=parse_technical_bodies(tb_filter_str),
-    )
+    """Execute search and return request/response pair.
 
-    async with TeddiClient() as client:
+    The technical-body list advertised by TEDDI is fetched through the cached
+    client whenever a filter is given, so new codes are picked up without a
+    release; a failed menu fetch aborts the search.
+
+    Args:
+        term: Search term.
+        search_scope: Where to search inside each entry.
+        search_pattern: How the term must occur.
+        tb_filter_str: Optional comma-separated technical-body filter.
+        cache_ttl: TTL in seconds for cached search responses.
+        menu_cache_ttl: TTL in seconds for cached technical-body menus.
+
+    Returns:
+        The canonical request plus the parsed response.
+
+    Raises:
+        httpx2.HTTPError: If the menu (with a filter) or search request fails.
+        ValueError: If an unknown technical body is requested.
+    """
+    async with TeddiClient(
+        cache_ttl=cache_ttl,
+        menu_cache_ttl=menu_cache_ttl,
+    ) as client:
+        if tb_filter_str:
+            known = await client.get_available_technical_bodies()
+            technical_bodies = parse_technical_bodies(tb_filter_str, known)
+        else:
+            technical_bodies = parse_technical_bodies(tb_filter_str, [])
+        request = SearchRequest(
+            term=term,
+            search_in=search_scope,
+            search_pattern=search_pattern,
+            technical_bodies=technical_bodies,
+        )
         response = await client.search_terms(request)
 
     return request, response
 
 
-def parse_technical_bodies(tb_filter_str: str | None) -> list[str] | None:
+def parse_technical_bodies(tb_filter_str: str | None, known_bodies: list[str]) -> list[str] | None:
     """Parse a comma-separated technical-body filter into canonical codes.
 
-    Matching is case-insensitive; TEDDI itself expects the published casing,
-    so values are normalised to the codes in `TECHNICAL_BODY_CODES`.
+    Matching is case-insensitive against the codes TEDDI currently advertises
+    (``known_bodies``); values are normalised to the published casing.
 
     Args:
         tb_filter_str: Optional comma-separated list (e.g. ``"3GPP,stq"``).
+        known_bodies: Codes currently advertised by TEDDI (cached menu list).
 
     Returns:
         Canonical technical-body codes, or None when the filter is empty.
 
     Raises:
-        ValueError: If any entry is not a supported technical body.
+        ValueError: If any entry is not a known technical body.
     """
     if not tb_filter_str:
         return None
@@ -149,21 +179,28 @@ def parse_technical_bodies(tb_filter_str: str | None) -> list[str] | None:
     if not values:
         return None
 
-    lookup = {code.casefold(): code for code in TECHNICAL_BODY_CODES}
+    lookup = {code.casefold(): code for code in known_bodies}
     lookup["all"] = "ALL"
 
     parsed: list[str] = []
     for value in values:
         code = lookup.get(value.casefold())
         if code is None:
-            valid = ", ".join(TECHNICAL_BODY_CODES)
+            valid = ", ".join(known_bodies)
             raise ValueError(f"Invalid technical body '{value}'. Supported values: {valid}, ALL")
         parsed.append(code)
 
     return parsed
 
 
-async def execute_list_bodies() -> list[str]:
-    """Execute list bodies and return technical-body codes."""
-    async with TeddiClient() as client:
+async def execute_list_bodies(menu_cache_ttl: int = TEDDI_MENU_CACHE_TTL) -> list[str]:
+    """Fetch the technical-body codes TEDDI currently advertises.
+
+    Args:
+        menu_cache_ttl: TTL in seconds for the cached technical-body menu.
+
+    Returns:
+        Technical-body codes (cached for `menu_cache_ttl` seconds).
+    """
+    async with TeddiClient(menu_cache_ttl=menu_cache_ttl) as client:
         return await client.get_available_technical_bodies()

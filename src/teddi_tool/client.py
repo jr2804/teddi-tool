@@ -8,7 +8,6 @@ import httpx2
 
 from teddi_tool.http_client import create_cached_teddi_async_client
 from teddi_tool.models import (
-    TECHNICAL_BODY_CODES,
     SearchIn,
     SearchPattern,
     SearchRequest,
@@ -18,6 +17,12 @@ from teddi_tool.parser import parse_technical_bodies_page, parse_teddi_response
 
 TEDDI_SEARCH_URL = "https://webapp.etsi.org/Teddi/Main.asp"
 TEDDI_MENU_URL = "https://webapp.etsi.org/Teddi/Menu.asp"
+
+# Search responses are volatile, so their cached responses expire quickly.
+SEARCH_CACHE_TTL = 2 * 60 * 60
+
+# The menu changes rarely, so its cached responses get a generous TTL (90 days).
+TEDDI_MENU_CACHE_TTL = 90 * 24 * 60 * 60
 
 # Map enums to TEDDI form parameter values
 SEARCH_IN_TO_PARAM = {
@@ -80,29 +85,52 @@ class TeddiClient:
         self,
         client: httpx2.AsyncClient | None = None,
         cache_dir: Path | None = None,
+        cache_ttl: int = SEARCH_CACHE_TTL,
+        menu_cache_ttl: int = TEDDI_MENU_CACHE_TTL,
     ) -> None:
         """Initialize TeddiClient.
 
         Args:
-            client: Optional pre-configured httpx2.AsyncClient.
+            client: Optional pre-configured httpx2.AsyncClient (bypasses caching).
             cache_dir: Optional cache directory for HTTP caching.
+            cache_ttl: TTL in seconds for cached search responses.
+            menu_cache_ttl: TTL in seconds for cached technical-body menus.
+
+        Raises:
+            ValueError: If a TTL is not positive.
         """
+        if cache_ttl <= 0 or menu_cache_ttl <= 0:
+            raise ValueError("Cache TTLs must be positive")
         self._client = client
+        self._menu_client: httpx2.AsyncClient | None = None
         self._cache_dir = cache_dir
+        self._cache_ttl = cache_ttl
+        self._menu_cache_ttl = menu_cache_ttl
         self._owned_client = False
 
     async def __aenter__(self) -> "TeddiClient":
         """Context manager entry."""
         if self._client is None:
-            self._client = await create_cached_teddi_async_client(cache_dir=self._cache_dir)
+            self._client = await create_cached_teddi_async_client(
+                cache_dir=self._cache_dir,
+                cache_ttl=self._cache_ttl,
+            )
+            self._menu_client = await create_cached_teddi_async_client(
+                cache_dir=self._cache_dir,
+                cache_ttl=self._menu_cache_ttl,
+            )
             self._owned_client = True
         return self
 
     async def __aexit__(self, *args) -> None:
         """Context manager exit."""
-        if self._owned_client and self._client:
-            await self._client.aclose()
-            self._client = None
+        if self._owned_client:
+            if self._client:
+                await self._client.aclose()
+                self._client = None
+            if self._menu_client:
+                await self._menu_client.aclose()
+                self._menu_client = None
 
     async def search_terms(self, request: SearchRequest) -> SearchResponse:
         """Search for terms in TEDDI.
@@ -155,22 +183,20 @@ class TeddiClient:
     async def get_available_technical_bodies(self) -> list[str]:
         """Get list of available technical bodies from the TEDDI search form.
 
-        Falls back to the bundled code list when the menu page cannot be
-        fetched or parsed.
+        Menu responses are cached for ``TEDDI_MENU_CACHE_TTL`` (90 days) in a
+        dedicated client, since the list changes rarely. When a client was
+        injected, it is used for the menu request as well.
 
         Returns:
             Technical-body codes accepted by the ``qShowTBs`` filter.
-        """
-        client = self._get_client()
-        try:
-            response = await client.get(TEDDI_MENU_URL)
-            response.raise_for_status()
-            bodies = parse_technical_bodies_page(response.text)
-        except (httpx2.HTTPError, ValueError):
-            logger.warning("Falling back to bundled technical-body list")
-            return list(TECHNICAL_BODY_CODES)
 
-        return bodies or list(TECHNICAL_BODY_CODES)
+        Raises:
+            httpx2.HTTPError: If the menu page cannot be fetched.
+            ValueError: If the menu page cannot be parsed.
+            RuntimeError: If the client was not initialised.
+        """
+        menu_client = self._menu_client if self._menu_client is not None else self._get_client()
+        return await self._read_technical_bodies(menu_client)
 
     async def fetch_document(self, url: str) -> bytes:
         """Fetch document content from URL.
@@ -195,3 +221,21 @@ class TeddiClient:
         if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
         return self._client
+
+    @staticmethod
+    async def _read_technical_bodies(client: httpx2.AsyncClient) -> list[str]:
+        """Fetch and parse the technical-body menu via ``client``.
+
+        Args:
+            client: HTTP client used for the menu request.
+
+        Returns:
+            Technical-body codes accepted by the ``qShowTBs`` filter.
+
+        Raises:
+            httpx2.HTTPError: If the menu page cannot be fetched.
+            ValueError: If the menu page cannot be parsed.
+        """
+        response = await client.get(TEDDI_MENU_URL)
+        response.raise_for_status()
+        return parse_technical_bodies_page(response.text)

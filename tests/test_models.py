@@ -1,7 +1,6 @@
 """Tests for Pydantic models and enums."""
 
 from src.teddi_tool.models import (
-    TECHNICAL_BODY_CODES,
     DocumentRef,
     OutputFormat,
     SearchIn,
@@ -27,16 +26,6 @@ class TestEnums:
         assert SearchPattern.EXACT_MATCH.value == "exactmatch"
         assert SearchPattern.STARTING_WITH.value == "startingwith"
         assert SearchPattern.ENDING_WITH.value == "endingwith"
-
-    def test_technical_body_codes_are_usable(self) -> None:
-        """Test the bundled technical-body codes mirror the TEDDI menu."""
-        assert len(TECHNICAL_BODY_CODES) > 100
-        assert "3GPP" in TECHNICAL_BODY_CODES
-        assert "STQ" in TECHNICAL_BODY_CODES
-        assert "Ecma" in TECHNICAL_BODY_CODES
-        assert "ALL" not in TECHNICAL_BODY_CODES
-        assert all(code.strip() for code in TECHNICAL_BODY_CODES)
-        assert len(set(TECHNICAL_BODY_CODES)) == len(TECHNICAL_BODY_CODES)
 
     def test_output_format_enum_values(self) -> None:
         """Test OutputFormat enum has expected values."""

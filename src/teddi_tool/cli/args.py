@@ -51,3 +51,21 @@ OutputOption = Annotated[
         env_var=f"{APP_NAME_UPPERCASE}_OUTPUT",
     ),
 ]
+
+CacheTtlOption = Annotated[
+    int,
+    Parameter(
+        name=["--cache-ttl"],
+        help="Search cache TTL in seconds (default 7200 = 2 hours)",
+        env_var=f"{APP_NAME_UPPERCASE}_CACHE_TTL",
+    ),
+]
+
+MenuCacheTtlOption = Annotated[
+    int,
+    Parameter(
+        name=["--menu-cache-ttl"],
+        help="Technical-body menu cache TTL in seconds (default 7776000 = 90 days)",
+        env_var=f"{APP_NAME_UPPERCASE}_MENU_CACHE_TTL",
+    ),
+]
