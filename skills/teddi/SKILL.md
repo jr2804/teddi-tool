@@ -86,8 +86,9 @@ Arguments: `term` (required) and optional `technical_bodies`. It forces
 ### `list_technical_bodies`
 
 No arguments. Returns `{"technical_bodies": [...]}` with the codes accepted by
-`technical_bodies`. Currently only `all` is exposed, so filtering by a
-specific body is not yet supported by either interface.
+`technical_bodies` (the TEDDI search form advertises 115, such as `3GPP`,
+`Ecma`, `eHEALTH`, `STQ`). Filters are matched case-insensitively, and `all`
+searches every body.
 
 ## Recommended workflow
 

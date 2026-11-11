@@ -22,7 +22,7 @@ teddi search-term "QoS" --pattern exactmatch
 teddi search-term "QoS" --pattern startingwith
 teddi search-term "QoS" --scope definitions
 teddi search-term "QoS" --scope abbreviations
-teddi search-term "test" --technical-bodies "3gpp,etsi"
+teddi search-term "test" --technical-bodies "3gpp,stq"
 teddi search-term "QoS" --output json
 teddi search-term "QoS" --output ison
 teddi search-term "QoS" --output toon

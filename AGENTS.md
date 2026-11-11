@@ -128,11 +128,10 @@ _Always-injected_ — keep minimal. Everything else → `.agents/` files.
 1. **Async-first.** `TeddiClient` methods are `async` and need `async with TeddiClient(...)`;
    `_get_client()` raises `RuntimeError` otherwise. CLI commands wrap calls in `asyncio.run()`.
 2. **One HTTP layer.** TEDDI traffic goes through `create_cached_teddi_async_client()`
-   (`src/teddi_tool/http_client.py:13`). Never build a bare `httpx.AsyncClient` for TEDDI — it
+   (`src/teddi_tool/http_client.py:13`). Never build a bare `httpx2.AsyncClient` for TEDDI — it
    bypasses the hishel cache.
-3. **Enums own valid values.** `SearchIn`, `SearchPattern`, `TechnicalBody`, `OutputFormat`
-   (`src/teddi_tool/models.py`) are the only accepted values for their fields — extend the enum,
-   not the call site.
+3. **Valid values live in code.** `SearchIn` and `SearchPattern` enums (`src/teddi_tool/models.py`)
+   plus `TECHNICAL_BODY_CODES` define accepted filters — extend those, not the call site.
 4. **No duplicated search logic.** Execution and rendering live in `src/teddi_tool/search_utils.py`;
    CLIs and MCP tools only adapt arguments (see `src/teddi_tool/AGENTS.md`).
 5. **Scraped HTML is a contract.** Parser behaviour is pinned by `tests/test_parser.py`; change

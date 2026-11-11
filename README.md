@@ -38,7 +38,7 @@ mise dev
 ```bash
 teddi search-term "QoS" --pattern exactmatch
 teddi search-term "QoS" --scope definitions --output json
-teddi search-term "test" --technical-bodies "3gpp,etsi"
+teddi search-term "test" --technical-bodies "3gpp,stq"
 teddi list-bodies
 teddi-mcp        # MCP server on stdio
 ```
@@ -64,7 +64,7 @@ existing scripts.
 |--------|----------------|
 | `src/teddi_tool/models.py` | Pydantic models and enums |
 | `src/teddi_tool/client.py` | `TeddiClient` and the `TeddiSource` protocol |
-| `src/teddi_tool/http_client.py` | Cached httpx client factory |
+| `src/teddi_tool/http_client.py` | Cached httpx2 client factory |
 | `src/teddi_tool/parser.py` | TEDDI HTML parsing |
 | `src/teddi_tool/search_utils.py` | Shared search/output helpers |
 | `src/teddi_tool/cli/` | Cyclopts CLI |

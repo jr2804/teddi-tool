@@ -32,7 +32,7 @@ Detail files (`.agents/policies/`):
 Project-specific:
 
 - Do not hit the live TEDDI endpoint from tests or automation — mock the
-  `httpx` client (see `tests/AGENTS.md`).
+  `httpx2` client (see `tests/AGENTS.md`).
 - Do not commit `.cache/`, `tests/.cache/`, or `.agents/plans/`.
 - TEDDI has no public API contract. Treat the scraped page shape as evidence
   that must be re-checked, never as prior knowledge.

@@ -43,7 +43,7 @@ teddi search-term "QoS" --pattern exactmatch
 teddi search-term "QoS" --scope definitions --output json
 
 # Filter by technical bodies
-teddi search-term "test" --technical-bodies "3gpp,etsi"
+teddi search-term "test" --technical-bodies "3gpp,stq"
 
 # List known technical bodies
 teddi list-bodies

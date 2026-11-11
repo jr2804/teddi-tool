@@ -36,7 +36,7 @@ Run a single test file directly:
 uv run pytest tests/test_parser.py -v
 ```
 
-Tests never call TEDDI: they inject an `httpx.AsyncClient` with a mocked
+Tests never call TEDDI: they inject an `httpx2.AsyncClient` with a mocked
 transport (see `tests/test_client.py`). Cache paths use the `cache_dir` fixture,
 never the repository `.cache/`.
 
@@ -81,7 +81,7 @@ TEDDI, which keeps the client mockable:
 ```python
 class TeddiSource(Protocol):
     async def search_terms(self, request: SearchRequest) -> SearchResponse: ...
-    async def get_available_technical_bodies(self) -> list[TechnicalBody]: ...
+    async def get_available_technical_bodies(self) -> list[str]: ...
     async def fetch_document(self, url: str) -> bytes: ...
 ```
 
@@ -96,7 +96,7 @@ Requests go through `create_cached_teddi_async_client()`:
   refresh-on-access)
 - 30 s timeout, browser User-Agent
 
-There is no retry transport; failed requests surface as `httpx.HTTPError`.
+There is no retry transport; failed requests surface as `httpx2.HTTPError`.
 
 ### TB Grouping in Parser
 

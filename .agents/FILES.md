@@ -13,7 +13,7 @@ Kept compact — agents hallucinate less when they know where definitions live.
 
 | What | Where | Key names |
 |------|-------|-----------|
-| Pydantic models & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `TechnicalBody`, `OutputFormat`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
+| Pydantic models & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `OutputFormat`, `TECHNICAL_BODY_CODES`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
 | TEDDI endpoint URL | `src/teddi_tool/client.py:21` | `TEDDI_SEARCH_URL` = `https://webapp.etsi.org/Teddi/Main.asp` |
 | Enum → TEDDI form values | `src/teddi_tool/client.py:24`–`35` | `SEARCH_IN_TO_PARAM`, `SEARCH_PATTERN_TO_PARAM` |
 | TEDDI form field names | `src/teddi_tool/client.py:124`–`140` | `qWhatToSearch`, `qWhereOption`, `qWhatOption`, `qShowTBs` |

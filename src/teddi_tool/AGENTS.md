@@ -16,18 +16,19 @@ owns tooling and path inventories.
 
 - `TeddiSource` (`src/teddi_tool/client.py:38`) is the seam between consumers and TEDDI.
   Type new consumers against it, not against `TeddiClient`.
-- `TeddiClient` is an async context manager: `__aenter__` creates the cached httpx client only
+- `TeddiClient` is an async context manager: `__aenter__` creates the cached httpx2 client only
   when none was injected, and `__aexit__` closes only a client it owns
   (`src/teddi_tool/client.py:93`–`104`). `_get_client()` raises `RuntimeError` outside the
   context.
 - Search request shape (`src/teddi_tool/client.py:122`–`145`): `POST TEDDI_SEARCH_URL`
-  (`https://webapp.etsi.org/Teddi/Main.asp`) with form fields `qWhatToSearch`, `qWhereOption`
-  (from `SEARCH_IN_TO_PARAM`), `qWhatOption` (from `SEARCH_PATTERN_TO_PARAM`), `qShowTBs`
-  (upper-cased `TechnicalBody` values joined by comma, `ALL` for `TechnicalBody.ALL`), plus
-  `btnSearch.x` / `btnSearch.y`.
-- `get_available_technical_bodies()` returns the static `TechnicalBody` enum minus `ALL`
-  (`src/teddi_tool/client.py:157`–`166`). TEDDI is not queried — enum additions must match real
-  TEDDI TB codes.
+  (`https://webapp.etsi.org/Teddi/Main.asp`) with form fields `qWhatToSearch`, `qWhatOption`
+  (from `SEARCH_IN_TO_PARAM`), `qWhereOption` (from `SEARCH_PATTERN_TO_PARAM`), `qShowTBs`
+  (comma-joined `TECHNICAL_BODY_CODES` values in TEDDI casing, `ALL` when the filter is `all`),
+  plus `btnSearch.x` / `btnSearch.y`.
+- `get_available_technical_bodies()` GETs `TEDDI_MENU_URL`
+  (`https://webapp.etsi.org/Teddi/Menu.asp`) and parses `select[name=qShowTBs` via
+  `parse_technical_bodies_page`; on HTTP/parse errors it falls back to the bundled
+  `TECHNICAL_BODY_CODES` (`src/teddi_tool/client.py:157`–`180`).
 - Cache contract (`src/teddi_tool/http_client.py:13`): hishel `AsyncSqliteStorage`,
   `.cache/teddi_http.sqlite3` by default, `cache_ttl=7200` fixed at write time (hishel 2.x has no
   refresh-on-access), 30 s timeout, browser User-Agent. There is no retry transport.
@@ -53,7 +54,7 @@ owns tooling and path inventories.
 - Adding an output format: extend `OutputFormat` in `models.py`, implement in
   `serialize_payload`, then assert the new branch in `tests/test_search_utils.py` (create it if
   absent).
-- Responses that cannot be parsed raise `ValueError`; HTTP failures propagate as `httpx.HTTPError`. Do not swallow either at the client layer.
+- Responses that cannot be parsed raise `ValueError`; HTTP failures propagate as `httpx2.HTTPError`. Do not swallow either at the client layer.
 - Log through the module-level `logger`; request payloads stay at `DEBUG` so term content is not logged at default levels.
 - Never re-order the `[project.scripts]` entries in `pyproject.toml` — console-script name changes are user-facing breakage.
 
