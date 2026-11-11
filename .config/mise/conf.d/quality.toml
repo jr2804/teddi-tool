@@ -17,7 +17,7 @@ depends = [
 
 [tasks.release-notes]
 description = "Generate release notes for the latest tag with an OpenAI-compatible endpoint"
-run = "uv run --with httpx python scripts/release_notes.py"
+run = "uv run --with httpx2 python scripts/release_notes.py"
 
 [tasks.clean]
 description = "Clean build artifacts"

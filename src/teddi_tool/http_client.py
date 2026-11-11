@@ -3,9 +3,9 @@
 import logging
 from pathlib import Path
 
-import httpx
+import httpx2
 from hishel import AsyncSqliteStorage
-from hishel.httpx import AsyncCacheClient
+from hishel.httpx2 import AsyncCacheClient
 
 logger = logging.getLogger(__name__)
 
@@ -13,15 +13,15 @@ logger = logging.getLogger(__name__)
 async def create_cached_teddi_async_client(
     cache_dir: Path | None = None,
     cache_ttl: int = 7200,
-) -> httpx.AsyncClient:
-    """Create an async httpx.AsyncClient with hishel caching for TEDDI requests.
+) -> httpx2.AsyncClient:
+    """Create an async httpx2.AsyncClient with hishel caching for TEDDI requests.
 
     Args:
         cache_dir: Directory for cache SQLite database. Defaults to `.cache/`.
         cache_ttl: Cache TTL in seconds. Defaults to 2 hours (7200 seconds).
 
     Returns:
-        httpx.AsyncClient configured with hishel caching.
+        httpx2.AsyncClient configured with hishel caching.
     """
     if cache_dir is None:
         cache_dir = Path.cwd() / ".cache"
@@ -37,7 +37,7 @@ async def create_cached_teddi_async_client(
         default_ttl=cache_ttl,
     )
 
-    # Create httpx async client with hishel caching
+    # Create httpx2 async client with hishel caching
     client = AsyncCacheClient(
         storage=storage,
         headers={

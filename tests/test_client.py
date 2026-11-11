@@ -2,7 +2,7 @@
 
 from unittest.mock import AsyncMock, Mock, patch
 
-import httpx
+import httpx2
 import pytest
 
 from src.teddi_tool.client import TeddiClient
@@ -134,7 +134,7 @@ class TestTeddiClient:
     async def test_get_available_technical_bodies_falls_back(self) -> None:
         """Test technical bodies fall back to the bundled list on HTTP errors."""
         mock_client = AsyncMock()
-        mock_client.get.side_effect = httpx.HTTPError("unavailable")
+        mock_client.get.side_effect = httpx2.HTTPError("unavailable")
 
         client = TeddiClient(client=mock_client)
         bodies = await client.get_available_technical_bodies()

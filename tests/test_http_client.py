@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-import httpx
+import httpx2
 import pytest
 from hishel import AsyncSqliteStorage
-from hishel.httpx import AsyncCacheClient
+from hishel.httpx2 import AsyncCacheClient
 
 from src.teddi_tool.http_client import create_cached_teddi_async_client
 
@@ -21,7 +21,7 @@ class TestCreateCachedTeddiAsyncClient:
         client = await create_cached_teddi_async_client(cache_dir=cache_dir)
 
         try:
-            assert isinstance(client, httpx.AsyncClient)
+            assert isinstance(client, httpx2.AsyncClient)
             assert isinstance(client, AsyncCacheClient)
 
             storage = getattr(client, "storage", None)

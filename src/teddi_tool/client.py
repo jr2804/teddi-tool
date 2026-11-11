@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Protocol
 
-import httpx
+import httpx2
 
 from teddi_tool.http_client import create_cached_teddi_async_client
 from teddi_tool.models import (
@@ -68,7 +68,7 @@ class TeddiSource(Protocol):
             Document content as bytes.
 
         Raises:
-            httpx.HTTPError: If fetch fails.
+            httpx2.HTTPError: If fetch fails.
         """
         ...
 
@@ -78,13 +78,13 @@ class TeddiClient:
 
     def __init__(
         self,
-        client: httpx.AsyncClient | None = None,
+        client: httpx2.AsyncClient | None = None,
         cache_dir: Path | None = None,
     ) -> None:
         """Initialize TeddiClient.
 
         Args:
-            client: Optional pre-configured httpx.AsyncClient.
+            client: Optional pre-configured httpx2.AsyncClient.
             cache_dir: Optional cache directory for HTTP caching.
         """
         self._client = client
@@ -114,7 +114,7 @@ class TeddiClient:
             SearchResponse with matching terms and documents.
 
         Raises:
-            httpx.HTTPError: If HTTP request fails.
+            httpx2.HTTPError: If HTTP request fails.
             ValueError: If response cannot be parsed.
         """
         client = self._get_client()
@@ -166,7 +166,7 @@ class TeddiClient:
             response = await client.get(TEDDI_MENU_URL)
             response.raise_for_status()
             bodies = parse_technical_bodies_page(response.text)
-        except (httpx.HTTPError, ValueError):
+        except (httpx2.HTTPError, ValueError):
             logger.warning("Falling back to bundled technical-body list")
             return list(TECHNICAL_BODY_CODES)
 
@@ -182,7 +182,7 @@ class TeddiClient:
             Document content as bytes.
 
         Raises:
-            httpx.HTTPError: If fetch fails.
+            httpx2.HTTPError: If fetch fails.
         """
         client = self._get_client()
         logger.debug(f"Fetching document: {url}")
@@ -190,7 +190,7 @@ class TeddiClient:
         response.raise_for_status()
         return response.content
 
-    def _get_client(self) -> httpx.AsyncClient:
+    def _get_client(self) -> httpx2.AsyncClient:
         """Get or create client."""
         if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")

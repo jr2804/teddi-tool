@@ -106,7 +106,7 @@ jobs:
         OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
         OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
       run: |
-        uv run --no-project --with httpx python scripts/release_notes.py \
+        uv run --no-project --with httpx2 python scripts/release_notes.py \
           --to-ref "${{ steps.version.outputs.version }}" --output RELEASE_NOTES.md
 
     - name: Create release
