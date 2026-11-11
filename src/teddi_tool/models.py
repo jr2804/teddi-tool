@@ -3,6 +3,127 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+# Technical-body codes offered by the TEDDI search form (``select[name=qShowTBs]``
+# in https://webapp.etsi.org/Teddi/Menu.asp). Values are case-sensitive on the
+# server side, so they are stored exactly as TEDDI publishes them.
+TECHNICAL_BODY_CODES: tuple[str, ...] = (
+    "3GPP",
+    "AERO",
+    "AFI",
+    "ARF",
+    "AT",
+    "ATA",
+    "ATM",
+    "ATTM",
+    "BOARD",
+    "BRAN",
+    "BROADCAS",
+    "BT",
+    "BTC",
+    "CABLE",
+    "CCM",
+    "CDM",
+    "CIM",
+    "CLOUD",
+    "CN",
+    "CYBER",
+    "DATA",
+    "DECT",
+    "DTA",
+    "E2NA",
+    "E4P",
+    "EASI",
+    "ECI",
+    "Ecma",
+    "ECMATC32",
+    "EE",
+    "eHEALTH",
+    "EMTEL",
+    "ENI",
+    "ERM",
+    "ESI",
+    "ETI",
+    "F5G",
+    "GA",
+    "GRID",
+    "HF",
+    "ICC",
+    "IMCC",
+    "INS",
+    "INT",
+    "IP6",
+    "IPE",
+    "IPRC",
+    "ISAC",
+    "ISI",
+    "ISM",
+    "ITS",
+    "LI",
+    "LIS",
+    "LTN",
+    "M2M",
+    "MAT",
+    "MBC",
+    "MCD",
+    "M-COMM",
+    "MEC",
+    "MESA",
+    "MMG",
+    "MOI",
+    "MSG",
+    "MTA",
+    "MTC",
+    "MTS",
+    "mWT",
+    "NA",
+    "NFV",
+    "NGP",
+    "NIN",
+    "NTECH",
+    "OCG",
+    "OEU",
+    "oneM2M",
+    "ORI",
+    "OSG",
+    "OSM",
+    "PDL",
+    "PLT",
+    "PS",
+    "PTS",
+    "QKD",
+    "QSC",
+    "RES",
+    "RIS",
+    "RRS",
+    "RT",
+    "SAFETY",
+    "SAGE",
+    "SAI",
+    "SCP",
+    "SEC",
+    "SES",
+    "SET",
+    "SmartBAN",
+    "SmartM2M",
+    "SMG",
+    "SMT",
+    "SPAN",
+    "SPS",
+    "STQ",
+    "TCCE",
+    "TE",
+    "TETRA",
+    "THz",
+    "TIPHON",
+    "TISPAN",
+    "TM",
+    "TMN",
+    "TRAC",
+    "UMTS",
+    "USER",
+    "ZSM",
+)
+
 
 class OutputFormat(StrEnum):
     """Output format for CLI results."""
@@ -28,12 +149,6 @@ class SearchPattern(StrEnum):
     EXACT_MATCH = "exactmatch"
     STARTING_WITH = "startingwith"
     ENDING_WITH = "endingwith"
-
-
-class TechnicalBody(StrEnum):
-    """ETSI and standardization body identifiers."""
-
-    ALL = "all"
 
 
 @dataclass
@@ -77,7 +192,7 @@ class SearchRequest:
     search_pattern: SearchPattern = SearchPattern.ALL_OCCURRENCES
     """Pattern: exact match, starts with, etc."""
 
-    technical_bodies: list[TechnicalBody] | None = None
+    technical_bodies: list[str] | None = None
     """Filter by technical bodies. None or empty = all TBs."""
 
 

@@ -2,10 +2,11 @@
 
 from unittest.mock import AsyncMock, Mock, patch
 
+import httpx
 import pytest
 
 from src.teddi_tool.client import TeddiClient
-from src.teddi_tool.models import SearchIn, SearchPattern, SearchRequest, TechnicalBody
+from src.teddi_tool.models import SearchIn, SearchPattern, SearchRequest
 
 
 @pytest.mark.asyncio
@@ -68,7 +69,7 @@ class TestTeddiClient:
             term="test",
             search_in=SearchIn.DEFINITIONS,
             search_pattern=SearchPattern.STARTING_WITH,
-            technical_bodies=[TechnicalBody.ALL],
+            technical_bodies=["STQ"],
         )
         await client.search_terms(request)
 
@@ -76,14 +77,14 @@ class TestTeddiClient:
         mock_client.post.assert_called_once()
         call_args, call_kwargs = mock_client.post.call_args
         assert call_kwargs["data"]["qWhatToSearch"] == "test"
-        assert call_kwargs["data"]["qWhereOption"] == 3  # DEFINITIONS
-        assert call_kwargs["data"]["qWhatOption"] == 2  # STARTING_WITH
-        assert call_kwargs["data"]["qShowTBs"] == "ALL"
+        assert call_kwargs["data"]["qWhatOption"] == 2  # DEFINITIONS
+        assert call_kwargs["data"]["qWhereOption"] == 3  # STARTING_WITH
+        assert call_kwargs["data"]["qShowTBs"] == "STQ"
         assert call_kwargs["data"]["btnSearch.x"] == 0
         assert call_kwargs["data"]["btnSearch.y"] == 0
 
     async def test_search_with_multiple_technical_bodies(self) -> None:
-        """Test search with multiple technical bodies."""
+        """Test search with multiple technical bodies keeps TEDDI casing."""
         mock_html = """
         <table>
             <tr><th>Term</th><th>Description</th><th>Declared in document(s)</th></tr>
@@ -99,12 +100,47 @@ class TestTeddiClient:
         client = TeddiClient(client=mock_client)
         request = SearchRequest(
             term="test",
-            technical_bodies=[TechnicalBody.ALL],
+            technical_bodies=["Ecma", "STQ"],
         )
         await client.search_terms(request)
 
         call_args, call_kwargs = mock_client.post.call_args
-        assert call_kwargs["data"]["qShowTBs"] == "ALL"
+        assert call_kwargs["data"]["qShowTBs"] == "Ecma,STQ"
+
+    async def test_get_available_technical_bodies_parses_menu(self) -> None:
+        """Test technical bodies are read from the TEDDI search form."""
+        menu_html = """
+        <form>
+          <select name="qShowTBs">
+            <option value="ALL" selected>ALL TBs</option>
+            <option value=""></option>
+            <option value="3GPP">3GPP</option>
+            <option value="Ecma">Ecma</option>
+            <option value="STQ">STQ</option>
+          </select>
+        </form>
+        """
+
+        mock_client = AsyncMock()
+        mock_response = AsyncMock(text=menu_html)
+        mock_response.raise_for_status = Mock()
+        mock_client.get.return_value = mock_response
+
+        client = TeddiClient(client=mock_client)
+        bodies = await client.get_available_technical_bodies()
+
+        assert bodies == ["3GPP", "Ecma", "STQ"]
+
+    async def test_get_available_technical_bodies_falls_back(self) -> None:
+        """Test technical bodies fall back to the bundled list on HTTP errors."""
+        mock_client = AsyncMock()
+        mock_client.get.side_effect = httpx.HTTPError("unavailable")
+
+        client = TeddiClient(client=mock_client)
+        bodies = await client.get_available_technical_bodies()
+
+        assert "3GPP" in bodies
+        assert "ALL" not in bodies
 
     async def test_search_without_client_raises_error(self) -> None:
         """Test that search without initializing client raises error."""

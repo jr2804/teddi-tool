@@ -1,13 +1,13 @@
 """Tests for Pydantic models and enums."""
 
 from src.teddi_tool.models import (
+    TECHNICAL_BODY_CODES,
     DocumentRef,
     OutputFormat,
     SearchIn,
     SearchPattern,
     SearchRequest,
     SearchResponse,
-    TechnicalBody,
     TermResult,
 )
 
@@ -28,14 +28,15 @@ class TestEnums:
         assert SearchPattern.STARTING_WITH.value == "startingwith"
         assert SearchPattern.ENDING_WITH.value == "endingwith"
 
-    def test_technical_body_enum_has_expected_bodies(self) -> None:
-        """Test TechnicalBody enum has expected values."""
-        assert TechnicalBody.ALL.value == "all"
-
-    def test_technical_body_enum_from_value(self) -> None:
-        """Test creating TechnicalBody from string value."""
-        tb = TechnicalBody("all")
-        assert tb == TechnicalBody.ALL
+    def test_technical_body_codes_are_usable(self) -> None:
+        """Test the bundled technical-body codes mirror the TEDDI menu."""
+        assert len(TECHNICAL_BODY_CODES) > 100
+        assert "3GPP" in TECHNICAL_BODY_CODES
+        assert "STQ" in TECHNICAL_BODY_CODES
+        assert "Ecma" in TECHNICAL_BODY_CODES
+        assert "ALL" not in TECHNICAL_BODY_CODES
+        assert all(code.strip() for code in TECHNICAL_BODY_CODES)
+        assert len(set(TECHNICAL_BODY_CODES)) == len(TECHNICAL_BODY_CODES)
 
     def test_output_format_enum_values(self) -> None:
         """Test OutputFormat enum has expected values."""
@@ -90,14 +91,12 @@ class TestDataClasses:
             term="QoS",
             search_in=SearchIn.DEFINITIONS,
             search_pattern=SearchPattern.STARTING_WITH,
-            technical_bodies=[TechnicalBody.ALL],
+            technical_bodies=["3GPP", "STQ"],
         )
         assert request.term == "QoS"
         assert request.search_in == SearchIn.DEFINITIONS
         assert request.search_pattern == SearchPattern.STARTING_WITH
-        assert request.technical_bodies is not None
-        assert len(request.technical_bodies) == 1
-        assert request.technical_bodies[0] == TechnicalBody.ALL
+        assert request.technical_bodies == ["3GPP", "STQ"]
 
     def test_search_response_creation(self) -> None:
         """Test SearchResponse creation with results."""

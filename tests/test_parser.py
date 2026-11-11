@@ -1,6 +1,8 @@
 """Tests for HTML parsing of TEDDI responses."""
 
-from src.teddi_tool.parser import parse_teddi_response
+import pytest
+
+from src.teddi_tool.parser import parse_technical_bodies_page, parse_teddi_response
 
 
 class TestParseTermResult:
@@ -173,3 +175,30 @@ class TestParseTermResult:
 
         assert len(results) == 1
         assert results[0].documents[0].url == "https://example.com/ts-24-008"
+
+
+class TestParseTechnicalBodiesPage:
+    """Test parsing of the TEDDI search-form technical-body list."""
+
+    def test_parse_menu_options(self) -> None:
+        """Test ALL and empty entries are dropped while casing is kept."""
+        html = """
+        <form>
+          <select name="qShowTBs" size="6">
+            <option value="ALL" selected>ALL TBs</option>
+            <option value=""></option>
+            <option value="3GPP">3GPP</option>
+            <option value="Ecma">Ecma</option>
+            <option value="eHEALTH">eHEALTH</option>
+            <option value="STQ">STQ</option>
+          </select>
+        </form>
+        """
+        bodies = parse_technical_bodies_page(html)
+
+        assert bodies == ["3GPP", "Ecma", "eHEALTH", "STQ"]
+
+    def test_missing_select_raises(self) -> None:
+        """Test a page without the TB select is rejected."""
+        with pytest.raises(ValueError, match="qShowTBs"):
+            parse_technical_bodies_page("<html><body>nope</body></html>")

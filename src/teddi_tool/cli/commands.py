@@ -20,12 +20,14 @@ def search_term(
     term: args.TermArgument,
     *,
     scope: args.ScopeOption = SearchIn.BOTH,
-    pattern: args.PatternOption = SearchPattern.ALL_OCCURRENCES,
+    pattern: args.PatternOption = "alloccurrences",
     technical_bodies: args.TechnicalBodiesOption = None,
     output: args.OutputOption = OutputFormat.TABLE,
 ) -> None:
     """Search TEDDI terms with optional scope and pattern filters."""
-    request, response = asyncio.run(execute_search(term, scope, pattern, technical_bodies))
+    request, response = asyncio.run(
+        execute_search(term, scope, SearchPattern(pattern), technical_bodies)
+    )
 
     if output is OutputFormat.TABLE:
         render_table(term, response)
@@ -38,8 +40,8 @@ def list_bodies() -> None:
     """List available technical bodies in TEDDI."""
     bodies = asyncio.run(execute_list_bodies())
     print("Available Technical Bodies:")
-    for tb in bodies:
-        print(f"  - {tb.value}")
+    for body in bodies:
+        print(f"  - {body}")
 
 
 def server() -> None:

@@ -12,12 +12,12 @@ from toon_format import encode as toon_encode
 
 from teddi_tool.client import TeddiClient
 from teddi_tool.models import (
+    TECHNICAL_BODY_CODES,
     OutputFormat,
     SearchIn,
     SearchPattern,
     SearchRequest,
     SearchResponse,
-    TechnicalBody,
 )
 
 console = Console()
@@ -37,7 +37,7 @@ def build_results_payload(request: SearchRequest, response: SearchResponse) -> d
             "search_in": request.search_in.value,
             "search_pattern": request.search_pattern.value,
             "technical_bodies": (
-                [tb.value for tb in request.technical_bodies] if request.technical_bodies else None
+                list(request.technical_bodies) if request.technical_bodies else None
             ),
         },
         "total_count": response.total_count,
@@ -107,32 +107,6 @@ def render_table(term: str, response: SearchResponse) -> None:
     console.print(table)
 
 
-def parse_technical_bodies(tb_filter_str: str | None) -> list[TechnicalBody] | None:
-    """Parse a comma-separated technical-body filter into enum values.
-
-    Args:
-        tb_filter_str: Optional comma-separated list (e.g. ``"all"``).
-
-    Returns:
-        Parsed technical bodies, or None when the filter is empty.
-
-    Raises:
-        ValueError: If any entry is not a supported technical body.
-    """
-    if not tb_filter_str:
-        return None
-
-    values = [value.strip().lower() for value in tb_filter_str.split(",") if value.strip()]
-    if not values:
-        return None
-
-    try:
-        return [TechnicalBody(value) for value in values]
-    except ValueError as exc:
-        valid = ", ".join(tb.value for tb in TechnicalBody)
-        raise ValueError(f"Invalid technical_bodies value. Supported values: {valid}") from exc
-
-
 async def execute_search(
     term: str,
     search_scope: SearchIn,
@@ -153,7 +127,43 @@ async def execute_search(
     return request, response
 
 
-async def execute_list_bodies() -> list[TechnicalBody]:
-    """Execute list bodies and return technical bodies."""
+def parse_technical_bodies(tb_filter_str: str | None) -> list[str] | None:
+    """Parse a comma-separated technical-body filter into canonical codes.
+
+    Matching is case-insensitive; TEDDI itself expects the published casing,
+    so values are normalised to the codes in `TECHNICAL_BODY_CODES`.
+
+    Args:
+        tb_filter_str: Optional comma-separated list (e.g. ``"3GPP,stq"``).
+
+    Returns:
+        Canonical technical-body codes, or None when the filter is empty.
+
+    Raises:
+        ValueError: If any entry is not a supported technical body.
+    """
+    if not tb_filter_str:
+        return None
+
+    values = [value.strip() for value in tb_filter_str.split(",") if value.strip()]
+    if not values:
+        return None
+
+    lookup = {code.casefold(): code for code in TECHNICAL_BODY_CODES}
+    lookup["all"] = "ALL"
+
+    parsed: list[str] = []
+    for value in values:
+        code = lookup.get(value.casefold())
+        if code is None:
+            valid = ", ".join(TECHNICAL_BODY_CODES)
+            raise ValueError(f"Invalid technical body '{value}'. Supported values: {valid}, ALL")
+        parsed.append(code)
+
+    return parsed
+
+
+async def execute_list_bodies() -> list[str]:
+    """Execute list bodies and return technical-body codes."""
     async with TeddiClient() as client:
         return await client.get_available_technical_bodies()

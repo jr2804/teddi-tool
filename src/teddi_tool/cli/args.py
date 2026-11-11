@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from cyclopts import Parameter
 
-from teddi_tool.models import OutputFormat, SearchIn, SearchPattern
+from teddi_tool.models import OutputFormat, SearchIn
 
 # Application name for environment variables
 APP_NAME_UPPERCASE = "TEDDI_TOOL"
@@ -26,7 +26,7 @@ ScopeOption = Annotated[
 ]
 
 PatternOption = Annotated[
-    SearchPattern,
+    Literal["exactmatch", "startingwith", "endingwith", "alloccurrences"],
     Parameter(
         name=["--pattern", "-p"],
         help="Pattern matching: exactmatch, startingwith, endingwith, alloccurrences",
@@ -38,7 +38,7 @@ TechnicalBodiesOption = Annotated[
     str | None,
     Parameter(
         name=["--technical-bodies", "-t"],
-        help="Comma-separated TB names to filter by (e.g., '3gpp,etsi')",
+        help="Comma-separated TB names to filter by (e.g., '3gpp,stq')",
         env_var=f"{APP_NAME_UPPERCASE}_TECHNICAL_BODIES",
     ),
 ]

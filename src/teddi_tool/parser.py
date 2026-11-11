@@ -1,4 +1,4 @@
-"""HTML parser for TEDDI search results."""
+"""HTML parser for TEDDI search results and search-form metadata."""
 
 import logging
 from urllib.parse import urljoin
@@ -7,11 +7,46 @@ from bs4 import BeautifulSoup, Tag
 
 from teddi_tool.models import DocumentRef, TermResult
 
-logger = logging.getLogger(__name__)
-
 TEDDI_BASE_URL = "https://webapp.etsi.org"
 
 _EXTERNAL_URL_PREFIXES = ("http://", "https://", "//")
+
+_ALL_TECHNICAL_BODIES = "ALL"
+
+logger = logging.getLogger(__name__)
+
+
+def parse_technical_bodies_page(html_content: str) -> list[str]:
+    """Parse technical-body codes from the TEDDI search form.
+
+    Args:
+        html_content: HTML of the TEDDI menu page containing the ``qShowTBs``
+            select element.
+
+    Returns:
+        Technical-body codes in menu order, excluding the ``ALL`` sentinel and
+        empty entries.
+
+    Raises:
+        ValueError: If the page does not contain a ``qShowTBs`` select element.
+    """
+    soup = BeautifulSoup(html_content, "html.parser")
+    select = soup.find("select", attrs={"name": "qShowTBs"})
+    if select is None:
+        message = "TEDDI menu page does not contain a qShowTBs select element"
+        raise ValueError(message)
+
+    bodies: list[str] = []
+    for option in select.find_all("option"):
+        value = option.get("value")
+        if not isinstance(value, str):
+            continue
+        code = value.strip()
+        if not code or code == _ALL_TECHNICAL_BODIES or code in bodies:
+            continue
+        bodies.append(code)
+
+    return bodies
 
 
 def parse_teddi_response(html_content: str) -> list[TermResult]:

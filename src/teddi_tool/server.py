@@ -21,7 +21,7 @@ async def list_technical_bodies() -> dict[str, list[str]]:
     async with TeddiClient() as client:
         bodies = await client.get_available_technical_bodies()
 
-    return {"technical_bodies": [tb.value for tb in bodies]}
+    return {"technical_bodies": bodies}
 
 
 @server.tool
