@@ -1,6 +1,6 @@
-# teddi-mcp
+# teddi-tool
 
-FastMCP 3.0 server and Typer CLI wrapping ETSI TEDDI (TErms and Definitions Database Interactive).
+Cyclopts CLI and FastMCP server wrapping ETSI TEDDI (TErms and Definitions Database Interactive).
 
 ## DOX — self-documenting AGENTS.md hierarchy
 
@@ -92,7 +92,7 @@ When the user requests a durable behavior change, record it here or in the relev
 
 | Child | Covers | Parent keeps |
 | ----- | ------ | ------------ |
-| `src/teddi_mcp/AGENTS.md` | TEDDI access layer: models/enums, `TeddiClient` + `TeddiSource`, HTTP cache, HTML parser, and the CLI/MCP entry-point surface | Project-wide rules, state-file index, tool inventory |
+| `src/teddi_tool/AGENTS.md` | TEDDI access layer: models/enums, `TeddiClient` + `TeddiSource`, HTTP cache, HTML parser, and the CLI/MCP entry-point surface | Project-wide rules, state-file index, tool inventory |
 | `tests/AGENTS.md` | Test import style, mocking conventions, coverage of parser/client/CLI behaviour | Same |
 
 ## State files — `.agents/`, demand-loaded, not always injected
@@ -125,14 +125,24 @@ servers, skills, and runtimes used during development.
 
 _Always-injected_ — keep minimal. Everything else → `.agents/` files.
 
-1. **Async-first.** `TeddiClient` methods are `async` and need `async with TeddiClient(...)`; `_get_client()` raises `RuntimeError` otherwise. Typer commands wrap calls in `asyncio.run()`.
-2. **One HTTP layer.** TEDDI traffic goes through `create_cached_teddi_async_client()` (`src/teddi_mcp/http_client.py:13`). Never build a bare `httpx.AsyncClient` for TEDDI — it bypasses the hishel cache.
-3. **Enums own valid values.** `SearchIn`, `SearchPattern`, `TechnicalBody`, `OutputFormat` (`src/teddi_mcp/models.py`) are the only accepted values for their fields — extend the enum, not the call site.
-4. **No duplicated search logic.** Execution and rendering live in `src/teddi_mcp/search_utils.py`; CLIs and MCP tools only adapt arguments (see `src/teddi_mcp/AGENTS.md`).
-5. **Scraped HTML is a contract.** Parser behaviour is pinned by `tests/test_parser.py`; change parser and test together, never infer TEDDI markup from memory.
-6. **`uv` only.** Run tooling as `uv run …` / `uv sync`; never global `python`, `pip`, `pytest`, or `ruff`.
-7. **Import roots differ by tree.** Package modules import `teddi_mcp.*`; tests import `src.teddi_mcp.*`.
-8. **Lint contract.** Line length 100, Google docstrings, ruff preview rules (`ruff.toml`); type checking uses `ty.toml` with `error-on-warning = true`.
+1. **Async-first.** `TeddiClient` methods are `async` and need `async with TeddiClient(...)`;
+   `_get_client()` raises `RuntimeError` otherwise. CLI commands wrap calls in `asyncio.run()`.
+2. **One HTTP layer.** TEDDI traffic goes through `create_cached_teddi_async_client()`
+   (`src/teddi_tool/http_client.py:13`). Never build a bare `httpx.AsyncClient` for TEDDI — it
+   bypasses the hishel cache.
+3. **Enums own valid values.** `SearchIn`, `SearchPattern`, `TechnicalBody`, `OutputFormat`
+   (`src/teddi_tool/models.py`) are the only accepted values for their fields — extend the enum,
+   not the call site.
+4. **No duplicated search logic.** Execution and rendering live in `src/teddi_tool/search_utils.py`;
+   CLIs and MCP tools only adapt arguments (see `src/teddi_tool/AGENTS.md`).
+5. **Scraped HTML is a contract.** Parser behaviour is pinned by `tests/test_parser.py`; change
+   parser and test together, never infer TEDDI markup from memory.
+6. **`uv` and `mise` only.** Run tooling as `uv run …`, `uv sync`, or `mise <task>`; never global
+   `python`, `pip`, `pytest`, or `ruff`.
+7. **Import roots differ by tree.** Package modules import `teddi_tool.*`; tests import
+   `src.teddi_tool.*`.
+8. **Lint contract.** Line length 100, Google docstrings, ruff preview rules (`ruff.toml`);
+   type checking uses `ty.toml` with `error-on-warning = true`.
 
 ## ⛔ No Patching
 

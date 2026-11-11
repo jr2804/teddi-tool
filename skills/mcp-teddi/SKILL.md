@@ -1,6 +1,6 @@
 ---
 name: mcp-teddi
-description: MCP usage for ETSI TEDDI (Terms and Definitions Database Interactive) through the teddi-mcp server. Use when querying terms/abbreviations, listing technical bodies, validating technical body codes, or retrieving exact term definitions from Copilot chat tools.
+description: MCP usage for ETSI TEDDI (Terms and Definitions Database Interactive) through the teddi-mcp server (teddi-tool). Use when querying terms/abbreviations, listing technical bodies, validating technical body codes, or retrieving exact term definitions from Copilot chat tools.
 ---
 
 # MCP Server: TEDDI
@@ -23,7 +23,7 @@ Use these teddi MCP tools:
 - `get_term_info`
 - `list_technical_bodies`
 
-Depending on the MCP client, tool names may be displayed with a server prefix (for example, `mcp_teddi-mcp_search_teddi`).
+Depending on the MCP client, tool names may be displayed with a server prefix (for example, `mcp_teddi-tool_search_teddi`).
 
 ## Tool Details
 

@@ -1,18 +1,18 @@
 ---
 name: cli-teddi
-description: CLI usage for teddi-cli from source in this repository. Use when running TEDDI term searches and listing technical bodies from terminal with uv run commands.
+description: CLI usage for teddi-tool from source in this repository. Use when running TEDDI term searches and listing technical bodies from terminal with uv run commands.
 ---
 
-# CLI: teddi-cli
+# CLI: teddi-tool
 
 ## Overview
 
-Use `teddi-cli` for scripted or terminal-based TEDDI operations:
+Use `teddi-tool` (or the `teddi` alias) for scripted or terminal-based TEDDI
+operations:
 
 - search terms and definitions,
-- list available technical bodies.
-
-Note: `teddi-cli` is search-only. Start server mode with `teddi-mcp` (or `teddi server`).
+- list available technical bodies,
+- start the MCP server.
 
 All commands in this file must be run through uv.
 
@@ -21,13 +21,13 @@ All commands in this file must be run through uv.
 ### Search a term
 
 ```bash
-uv run teddi-cli term HATS
+uv run teddi-tool search-term HATS
 ```
 
 ### Search with filters
 
 ```bash
-uv run teddi-cli term HATS \
+uv run teddi-tool search-term HATS \
   --scope both \
   --pattern exactmatch \
   --technical-bodies 3gpp,itu,stq
@@ -36,16 +36,22 @@ uv run teddi-cli term HATS \
 ### List technical bodies
 
 ```bash
-uv run teddi-cli list-bodies
+uv run teddi-tool list-bodies
 ```
 
 ### Machine-readable output
 
 ```bash
-uv run teddi-cli term HATS --output <format>
+uv run teddi-tool search-term HATS --output <format>
 ```
 
 Supported `<format>` values: `table`, `json`, `ison`, `toon`.
+
+### Start the MCP server
+
+```bash
+uv run teddi-mcp        # or: uv run teddi-tool server
+```
 
 ## Arguments Reference
 

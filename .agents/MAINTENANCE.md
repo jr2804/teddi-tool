@@ -34,4 +34,4 @@ How to keep `.agents/` files current.
 | `plans/` | New feature implementation starts |
 | `history/` | HISTORY.md overflow or completed plans archived |
 | `files/`, `policies/`, `tools/`, `maintenance/` | State files split into subdirectories |
-| `../src/teddi_mcp/AGENTS.md`, `../tests/AGENTS.md` | Module layout, contracts, or test conventions change |
+| `../src/teddi_tool/AGENTS.md`, `../tests/AGENTS.md` | Module layout, contracts, or test conventions change |

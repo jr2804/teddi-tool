@@ -42,8 +42,8 @@ Project-specific:
 - Minimal, surgical edits. Preserve existing style.
 - No new dependencies without explicit instruction.
 - No unrelated refactoring while fixing a bug.
-- A model/enum change is a cross-layer change — see `src/teddi_mcp/AGENTS.md`
-  → Work Guidance before editing `src/teddi_mcp/models.py`.
+- A model/enum change is a cross-layer change — see `src/teddi_tool/AGENTS.md`
+  → Work Guidance before editing `src/teddi_tool/models.py`.
 
 ## Code quality
 
@@ -68,17 +68,15 @@ Universal defaults. Project-specific standards live in child AGENTS.md.
 Run from the repository root:
 
 ```bash
-uv run pytest tests/ -v
-uv run ruff check src/ tests/
-uv run ruff format --check src/ tests/
-uv run ty check
+mise test          # pytest with coverage
+mise lint-check    # ruff check (no fixes)
+mise typecheck     # ty check
+mise spell         # codespell
 ```
 
-`ty.toml` sets `error-on-warning = true`. Markdown formatting
-(`mise run format-md`) is optional and currently has no CI gate.
-
-Gaps as of 2026-11-10: there is no `test` or `typecheck` mise task, so use
-the `uv run` commands above. `mise run lint` targets `src/ tests/`.
+Direct equivalents: `uv run pytest`, `uv run ruff check src/ tests/`,
+`uv run ty check`. `ty.toml` sets `error-on-warning = true`. CI (`.github/workflows/ci.yml`)
+runs `lint-check`, `typecheck`, `spell`, and the test matrix.
 
 ## Response format
 

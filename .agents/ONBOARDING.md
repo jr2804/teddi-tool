@@ -5,24 +5,27 @@ project structure or tooling changes significantly.
 
 ## Project
 
-FastMCP 3.0 server plus Typer CLIs for ETSI TEDDI term/abbreviation lookup.
-Full docs at `README.md` and `docs/`.
+`teddi-tool` — Cyclopts CLI and FastMCP server for ETSI TEDDI term/abbreviation
+lookup. Distributed on PyPI, documented at
+<https://jr2804.github.io/teddi-tool/>. Full docs at `README.md` and `docs/`.
 
 ## Quick start
 
 ```bash
-uv sync --all-extras                # sync environment
-uv run pytest tests/ -v             # tests
-uv run ruff check src/ tests/       # lint
-uv run ruff format --check src/ tests/
-uv run ty check                     # type check
-mise run format                     # undersort + ruff import sort/format
-mise run format-md                  # markdown format
-mise run analyze                    # cytoscnpy quality/secrets scan
+mise install                        # pinned tools (uv, ruff, ty, rumdl, ...)
+mise dev                            # uv sync -U --dev --all-extras --all-groups
+mise test                           # pytest with coverage
+mise lint                           # ruff check --fix --unsafe-fixes
+mise lint-check                     # ruff check (CI mode)
+mise typecheck                      # ty check
+mise spell                          # codespell
+mise format                         # pyreorder + ruff format + import sort
+mise docs                           # zensical build
+mise all                            # everything above
 ```
 
-There is no `test` or `typecheck` task in `.config/mise/conf.d/` — use the
-`uv run` commands above.
+Direct commands also work: `uv run pytest tests/ -v`, `uv run ruff check
+src/ tests/`, `uv run ty check`.
 
 ## Entry points (read these first)
 
@@ -31,12 +34,12 @@ There is no `test` or `typecheck` task in `.config/mise/conf.d/` — use the
 | `AGENTS.md` | Root rail — rules + `.agents/` index |
 | `.agents/POLICIES.md` | Boundaries, priorities, verification |
 | `.agents/FILES.md` | Source-of-truth locations |
-| `src/teddi_mcp/AGENTS.md` | Contracts for the package you are editing |
+| `src/teddi_tool/AGENTS.md` | Contracts for the package you are editing |
 | `tests/AGENTS.md` | Test conventions |
 
 ## Where to dig deeper
 
-- `docs/` — `index.md`, `usage.md`, `api.md`, `development.md`
+- `docs/` — `index.md`, `usage.md`, `reference/api.md`, `development.md`
 - `.agents/TOOLS.md` — tools, MCP servers, skills, CLIs in use
 - `.agents/HISTORY.md` — past decisions and rationale
 - `skills/cli-teddi/SKILL.md`, `skills/mcp-teddi/SKILL.md` — task-level usage recipes
@@ -45,9 +48,9 @@ There is no `test` or `typecheck` task in `.config/mise/conf.d/` — use the
 
 | Command | Module | Purpose |
 |---------|--------|---------|
-| `teddi` | `src/teddi_mcp/cli.py` | Search, `list-bodies`, `server` |
-| `teddi-cli` | `src/teddi_mcp/search_cli.py` | Search-only CLI |
-| `teddi-mcp` | `src/teddi_mcp/server.py` | MCP server (stdio) |
+| `teddi-tool`, `teddi` | `src/teddi_tool/cli/app.py` | Search, `list-bodies`, `server` |
+| `teddi-cli` | `src/teddi_tool/cli/app.py` | Alias kept for existing scripts |
+| `teddi-mcp` | `src/teddi_tool/server.py` | MCP server (stdio) |
 
 ## Available tools
 
@@ -55,3 +58,11 @@ Development tools, MCP servers, skills, and CLIs are inventoried in the
 state file `.agents/TOOLS.md` — read it before assuming a tool, update it
 when tooling changes. If tooling grows large, detail moves to
 `.agents/tools/<name>.md` (each listed in TOOLS.md).
+
+## Project lifecycle
+
+- Releases: push a `v*` tag; `.github/workflows/release.yml` builds, writes
+  LLM release notes (`scripts/release_notes.py`), creates the GitHub release,
+  and publishes to PyPI via OIDC trusted publishing.
+- Template: generated from copier-uv-plus; `.copier-answers.yml` drives
+  `copier update`.

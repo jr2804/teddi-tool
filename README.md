@@ -1,78 +1,52 @@
-# TEDDI-MCP: FastMCP Server for ETSI TEDDI
+# TEDDI Tool
 
-A FastMCP 3.0 server that wraps ETSI's TErms and Definitions Database Interactive (TEDDI) for AI agent integration and command-line usage.
+[![PyPI](https://img.shields.io/pypi/v/teddi-tool.svg)](https://pypi.org/project/teddi-tool/)
+[![Python](https://img.shields.io/pypi/pyversions/teddi-tool.svg)](https://pypi.org/project/teddi-tool/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/jr2804/teddi-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/jr2804/teddi-tool/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jr2804.github.io/teddi-tool/)
+
+CLI and FastMCP server for the ETSI [TEDDI](https://webapp.etsi.org/Teddi/)
+terminology database.
 
 ## Features
 
-- **FastMCP 3.0 Server**: Expose TEDDI search as an MCP tool for AI agents (Claude, etc.)
-- **CLI Interface**: Search TEDDI from the command line with table, JSON, ISON, and TOON output
-- **HTTP Caching**: Automatic hishel-based caching of TEDDI responses (2-hour TTL)
-- **TB Grouping**: Smart parsing of sub-table results with technical body grouping logic
-- **Type-Safe**: Full Pydantic models and type hints throughout
-- **Async-First**: Built on asyncio for performance
+- **CLI** — `teddi search-term` / `teddi list-bodies` with table, JSON, ISON, and
+  TOON output
+- **MCP server** — `search_teddi`, `get_term_info`, and `list_technical_bodies`
+  tools for AI agents
+- **HTTP caching** — hishel/SQLite cache with a two-hour TTL
+- **Type-safe** — Pydantic models and full annotations
+- **Async-first** — one async client shared by both interfaces
 
-## Quick Start
-
-### Installation
+## Installation
 
 ```bash
-cd src/teddi-mcp
-uv pip install -e .
+uv tool install teddi-tool      # or: pipx install teddi-tool
 ```
 
-### CLI Usage
-
-Three executables are available:
+From source:
 
 ```bash
-# Full CLI (search + server)
+git clone https://github.com/jr2804/teddi-tool.git
+cd teddi-tool
+mise dev
+```
+
+## Usage
+
+```bash
 teddi search-term "QoS" --pattern exactmatch
-teddi list-bodies
-teddi server
-
-# Search-only CLI (equivalent to `teddi search-*`)
-teddi-cli term "QoS" --pattern exactmatch
-teddi-cli list-bodies
-
-# MCP server only (equivalent to `teddi server`)
-teddi-mcp
-```
-
-**Equivalences:**
-
-| Command | Equivalent |
-|---------|------------|
-| `teddi-mcp` | `teddi server` |
-| `teddi-cli term ...` | `teddi search-term ...` |
-| `teddi-cli list-bodies` | `teddi list-bodies` |
-
-**Output formats:**
-
-```bash
-# Table output (default)
-teddi search-term "QoS"
-
-# JSON output
-teddi search-term "QoS" --output json
-
-# ISON output (token-optimized)
-teddi search-term "QoS" --output ison
-
-# TOON output (token-optimized)
-teddi search-term "QoS" --output toon
-
-# Filter by technical bodies
+teddi search-term "QoS" --scope definitions --output json
 teddi search-term "test" --technical-bodies "3gpp,etsi"
+teddi list-bodies
+teddi-mcp        # MCP server on stdio
 ```
 
-### MCP Server
+`teddi-tool` and `teddi` are the same CLI; `teddi-cli` is an alias kept for
+existing scripts.
 
-```bash
-# Start the MCP server (stdio)
-teddi-mcp
-```
-
-Then configure your AI agent client (e.g., Claude) to use this server:
+### MCP client configuration
 
 ```json
 {
@@ -86,34 +60,28 @@ Then configure your AI agent client (e.g., Claude) to use this server:
 
 ## Architecture
 
-- **models.py**: Pydantic data models (SearchIn, SearchPattern, TechnicalBody enums)
-- **client.py**: Core TeddiClient with Protocol-based abstraction
-- **parser.py**: HTML parsing with TB grouping logic
-- **http_client.py**: HTTP session manager with hishel caching
-- **search_utils.py**: Shared search logic for CLI executables
-- **cli.py**: Typer CLI for `teddi` executable (full CLI)
-- **search_cli.py**: Typer CLI for `teddi-cli` executable (search-only)
-- **server.py**: FastMCP 3.0 server implementation
-
-## Testing
-
-```bash
-# Run all tests
-uv run pytest tests/teddi_mcp/ -v
-
-# Run with coverage
-uv run pytest tests/teddi_mcp/ --cov=teddi_mcp --cov-report=term-missing
-
-# Run specific test
-uv run pytest tests/teddi_mcp/test_parser.py -v
-```
+| Module | Responsibility |
+|--------|----------------|
+| `src/teddi_tool/models.py` | Pydantic models and enums |
+| `src/teddi_tool/client.py` | `TeddiClient` and the `TeddiSource` protocol |
+| `src/teddi_tool/http_client.py` | Cached httpx client factory |
+| `src/teddi_tool/parser.py` | TEDDI HTML parsing |
+| `src/teddi_tool/search_utils.py` | Shared search/output helpers |
+| `src/teddi_tool/cli/` | Cyclopts CLI |
+| `src/teddi_tool/server.py` | FastMCP server |
 
 ## Development
 
-See [docs/development.md](docs/development.md) for setup, tests, and code
-quality. Area contracts live next to the code:
+```bash
+mise dev        # install tools and sync dev dependencies
+mise test       # pytest with coverage
+mise all        # test, lint, spell, format, docs
+```
 
-- [`src/teddi_mcp/AGENTS.md`](src/teddi_mcp/AGENTS.md) — client, parser, CLI/MCP surface, adding features
+See [`docs/development.md`](docs/development.md) for setup and release notes.
+Area contracts live next to the code:
+
+- [`src/teddi_tool/AGENTS.md`](src/teddi_tool/AGENTS.md) — client, parser, CLI/MCP surface
 - [`tests/AGENTS.md`](tests/AGENTS.md) — test conventions
 - [`.agents/ONBOARDING.md`](.agents/ONBOARDING.md) — entry points and commands
 

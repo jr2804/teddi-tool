@@ -1,90 +1,65 @@
 # Usage
 
-## CLI Executables
+## Executables
 
-Three executables are provided:
+| Executable | Description |
+|------------|-------------|
+| `teddi-tool` | Full CLI: `search-term`, `list-bodies`, `server` |
+| `teddi` | Alias of `teddi-tool` |
+| `teddi-cli` | Alias of `teddi-tool` (kept for existing scripts) |
+| `teddi-mcp` | MCP server only (stdio) |
 
-| Executable | Description | Equivalent |
-|------------|-------------|------------|
-| `teddi` | Full CLI: search commands + server | — |
-| `teddi-cli` | Search commands only | `teddi search-*` |
-| `teddi-mcp` | MCP server only (stdio) | `teddi server` |
-
-**Command Equivalences:**
-
-| Command | Equivalent |
-|---------|------------|
-| `teddi-mcp` | `teddi server` |
-| `teddi-cli term ...` | `teddi search-term ...` |
-| `teddi-cli list-bodies` | `teddi list-bodies` |
+`teddi server` and `teddi-mcp` are equivalent. Shell completion is available via
+`teddi-tool --install-completion`.
 
 ## CLI Commands
 
 ### Search Terms
 
 ```bash
-# Basic search (full CLI)
-teddi search-term "QoS"
-
-# Search (search-only CLI)
-teddi-cli term "QoS"
-
-# Exact match
+teddi search-term "QoS"                        # table output (default)
 teddi search-term "QoS" --pattern exactmatch
-
-# Starting with
 teddi search-term "QoS" --pattern startingwith
-
-# Search in definitions only
 teddi search-term "QoS" --scope definitions
-
-# Search in abbreviations only
 teddi search-term "QoS" --scope abbreviations
-
-# Filter by technical bodies
 teddi search-term "test" --technical-bodies "3gpp,etsi"
-
-# Output formats
-teddi search-term "QoS" --output table
 teddi search-term "QoS" --output json
 teddi search-term "QoS" --output ison
 teddi search-term "QoS" --output toon
 ```
 
+Options can also be supplied through environment variables:
+`TEDDI_TOOL_SCOPE`, `TEDDI_TOOL_PATTERN`, `TEDDI_TOOL_TECHNICAL_BODIES`,
+`TEDDI_TOOL_OUTPUT`.
+
 ### List Technical Bodies
 
 ```bash
 teddi list-bodies
-# or
-teddi-cli list-bodies
 ```
 
 ### MCP Server
 
 ```bash
-# Start the MCP server (stdio mode)
-teddi-mcp
+teddi-mcp            # or: teddi server
 ```
 
 ## Output Formats
 
 | Format | Description |
 |--------|-------------|
-| `table` | Human-readable table (default) |
+| `table` | Human-readable rich table (default) |
 | `json` | Standard JSON |
-| `ison` | Token-optimized format |
-| `toon` | Tree-style token-optimized format |
+| `ison` | Token-optimized ISON |
+| `toon` | Tree-style token-optimized TOON |
 
 ## MCP Integration
-
-Configure your AI agent client:
 
 ```json
 {
   "mcpServers": {
     "teddi": {
-      "command": "teddi-mcp",
-      "args": ["server"]
+      "command": "teddi-mcp"
     }
   }
 }
@@ -92,6 +67,9 @@ Configure your AI agent client:
 
 ### Available MCP Tools
 
-- `search_term` - Search for terms in TEDDI
-- `list_technical_bodies` - List available technical bodies
-- `fetch_document` - Retrieve document content
+- `search_teddi` — search terms with scope, pattern, and TB filters
+- `get_term_info` — exact-match entries for one term, plus an `exact_match` flag
+- `list_technical_bodies` — supported TB filter values
+
+`fetch_document()` exists on the client but is intentionally not exposed as an
+MCP tool.

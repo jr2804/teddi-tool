@@ -1,83 +1,61 @@
-# TEDDI-MCP
+# TEDDI Tool
 
-FastMCP 3.0 server for ETSI TEDDI (TErms and Definitions Database Interactive).
+Search the [ETSI TEDDI](https://webapp.etsi.org/Teddi/) terminology database from
+the command line or through an MCP server for AI agents.
 
 ## Overview
 
-A FastMCP 3.0 server that wraps ETSI's TEDDI for AI agent integration and command-line usage.
+TEDDI Tool wraps ETSI's TErms and Definitions Database Interactive (TEDDI) in two
+interfaces that share one async client, parser, and output layer:
 
-## Features
+- **CLI** — table, JSON, ISON, and TOON output for humans and scripts.
+- **MCP server** — `search_teddi`, `get_term_info`, and `list_technical_bodies`
+  tools for Claude, OpenCode, and other MCP clients.
 
-- **FastMCP 3.0 Server**: Expose TEDDI search as an MCP tool for AI agents
-- **CLI Interface**: Search TEDDI from the command line with table, JSON, ISON, and TOON output
-- **HTTP Caching**: Automatic hishel-based caching of TEDDI responses (2-hour TTL)
-- **TB Grouping**: Smart parsing of sub-table results with technical body grouping logic
-- **Type-Safe**: Full Pydantic models and type hints throughout
-- **Async-First**: Built on asyncio for performance
+Requests are cached in a local SQLite store (hishel) with a two-hour TTL, and the
+scraped HTML is parsed into typed `TermResult`/`DocumentRef` objects.
+
+## Installation
+
+```bash
+# with uv (recommended)
+uv tool install teddi-tool
+
+# or with pipx
+pipx install teddi-tool
+```
+
+From a checkout:
+
+```bash
+git clone https://github.com/jr2804/teddi-tool.git
+cd teddi-tool
+mise dev
+```
 
 ## Quick Start
 
-### Installation
-
 ```bash
-cd teddi-mcp
-uv sync --all-extras
-uv pip install -e .
-```
-
-### CLI Usage
-
-Three executables are available:
-
-```bash
-# Full CLI (search + server)
+# Exact-match lookup
 teddi search-term "QoS" --pattern exactmatch
-teddi list-bodies
-teddi server
 
-# Search-only CLI (equivalent to `teddi search-*`)
-teddi-cli term "QoS" --pattern exactmatch
-teddi-cli list-bodies
-
-# MCP server only (equivalent to `teddi server`)
-teddi-mcp
-```
-
-**Equivalences:**
-
-| Command | Equivalent |
-|---------|------------|
-| `teddi-mcp` | `teddi server` |
-| `teddi-cli term ...` | `teddi search-term ...` |
-| `teddi-cli list-bodies` | `teddi list-bodies` |
-
-**Output formats:**
-
-```bash
-# Table output (default)
-teddi search-term "QoS"
-
-# JSON output
-teddi search-term "QoS" --output json
-
-# ISON output (token-optimized)
-teddi search-term "QoS" --output ison
-
-# TOON output (token-optimized)
-teddi search-term "QoS" --output toon
+# Search definitions only, JSON output
+teddi search-term "QoS" --scope definitions --output json
 
 # Filter by technical bodies
 teddi search-term "test" --technical-bodies "3gpp,etsi"
-```
 
-### MCP Server
+# List known technical bodies
+teddi list-bodies
 
-```bash
-# Start the MCP server (stdio)
+# Start the MCP server on stdio
 teddi-mcp
 ```
 
-Then configure your AI agent client to use this server:
+`teddi-tool` (primary) and `teddi` are the same CLI; `teddi-mcp` starts the server
+directly.
+
+## MCP Client Configuration
 
 ```json
 {
@@ -91,10 +69,11 @@ Then configure your AI agent client to use this server:
 
 ## Documentation
 
-- [Usage](usage.md) - Detailed CLI and MCP usage
-- [Development](development.md) - Development guidelines
-- [API Reference](api.md) - API documentation
+- [Usage](usage.md) — CLI commands, output formats, MCP tools
+- [Development](development.md) — setup, architecture, release process
+- [API Reference](reference/api.md) — models, client, parser
+- [Contributing](contributing.md)
 
 ## License
 
-MIT
+MIT — see [LICENSE](license.md).
