@@ -13,15 +13,15 @@ Kept compact — agents hallucinate less when they know where definitions live.
 
 | What | Where | Key names |
 |------|-------|-----------|
-| Dataclasses & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `OutputFormat`, `TECHNICAL_BODY_CODES`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
+| Dataclasses & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `OutputFormat`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
 | TEDDI endpoint URL | `src/teddi_tool/client.py:21` | `TEDDI_SEARCH_URL` = `https://webapp.etsi.org/Teddi/Main.asp` |
 | Enum → TEDDI form values | `src/teddi_tool/client.py:24`–`35` | `SEARCH_IN_TO_PARAM`, `SEARCH_PATTERN_TO_PARAM` |
 | TEDDI form field names | `src/teddi_tool/client.py:124`–`140` | `qWhatToSearch`, `qWhereOption`, `qWhatOption`, `qShowTBs` |
 | HTTP session + cache | `src/teddi_tool/http_client.py:13` | `create_cached_teddi_async_client(cache_dir=None, cache_ttl=7200)`; DB `.cache/teddi_http.sqlite3` |
 | HTML → models | `src/teddi_tool/parser.py:17` | `parse_teddi_response(html_content)`; one `DocumentRef` per anchor, so cells with several links yield several documents |
-| Source protocol / client | `src/teddi_tool/client.py:38`, `:75` | `TeddiSource`, `TeddiClient` |
-| Shared search + output | `src/teddi_tool/search_utils.py` | `execute_search`, `execute_list_bodies`, `build_results_payload`, `parse_technical_bodies`, `serialize_payload`, `render_table` |
-| Shared CLI options | `src/teddi_tool/cli/args.py` | `TermArgument`, `ScopeOption`, `PatternOption`, `TechnicalBodiesOption`, `OutputOption` |
+| Source protocol / client | `src/teddi_tool/client.py:38`, `:75` | `TeddiSource`, `TeddiClient(client, cache_dir, cache_ttl, menu_cache_ttl)` |
+| Shared search + output | `src/teddi_tool/search_utils.py` | `execute_search(..., cache_ttl, menu_cache_ttl)`, `execute_list_bodies(menu_cache_ttl)`, `build_results_payload`, `parse_technical_bodies(value, known_bodies)`, `serialize_payload`, `render_table` |
+| Shared CLI options | `src/teddi_tool/cli/args.py` | `TermArgument`, `ScopeOption`, `PatternOption`, `TechnicalBodiesOption`, `OutputOption`, `CacheTtlOption`, `MenuCacheTtlOption` |
 | CLI app and commands | `src/teddi_tool/cli/app.py`, `src/teddi_tool/cli/commands.py` | `search-term`, `list-bodies`, `server` commands |
 | MCP server & tools | `src/teddi_tool/server.py` | `search_teddi`, `get_term_info`, `list_technical_bodies` |
 | Console scripts | `pyproject.toml` → `[project.scripts]` | `teddi-tool`, `teddi`, `teddi-cli`, `teddi-mcp` |

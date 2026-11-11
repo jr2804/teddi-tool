@@ -62,15 +62,17 @@ above) when you want a read-only check.
 ## Project Layout
 
 The package lives in `src/teddi_tool/`; module-level contracts are documented
-in [`src/teddi_tool/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/src/teddi_tool/AGENTS.md)
-and test conventions in
-[`tests/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/tests/AGENTS.md).
+in [`src/teddi_tool/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/src/teddi_tool/AGENTS.md),
+test conventions in
+[`tests/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/tests/AGENTS.md),
+and entry points plus everyday commands in
+[`.agents/ONBOARDING.md`](https://github.com/jr2804/teddi-tool/blob/main/.agents/ONBOARDING.md).
 For a current file list, run `rg --files` instead of relying on a checked-in
 tree.
 
 | Module | Responsibility |
 |--------|----------------|
-| `models.py` | Dataclasses, `StrEnum` enums and `TECHNICAL_BODY_CODES` |
+| `models.py` | Dataclasses and `StrEnum` enums |
 | `client.py` | `TeddiSource` protocol and `TeddiClient` |
 | `parser.py` | TEDDI HTML parsing with TB grouping |
 | `http_client.py` | hishel-cached `httpx2` client factory |
@@ -99,8 +101,12 @@ class TeddiSource(Protocol):
 Requests go through `create_cached_teddi_async_client()`:
 
 - SQLite store: `.cache/teddi_http.sqlite3` (or the given `cache_dir`)
-- TTL: 2 hours, fixed when the entry is written (hishel 2.x has no
-  refresh-on-access)
+- TTL: 2 hours by default for search responses, 90 days for the technical-body
+  menu; both configurable via `TeddiClient(cache_ttl=..., menu_cache_ttl=...)`,
+  the CLI (`--cache-ttl` / `--menu-cache-ttl`, env
+  `TEDDI_TOOL_CACHE_TTL` / `TEDDI_TOOL_MENU_CACHE_TTL`), or the MCP server
+  environment. TTL is fixed when the entry is written (hishel 2.x has no
+  refresh-on-access).
 - 30 s timeout, browser User-Agent
 
 There is no retry transport; failed requests surface as `httpx2.HTTPError`.
@@ -117,8 +123,11 @@ Search submits a form to `https://webapp.etsi.org/Teddi/Main.asp`:
 | `qShowTBs` | Comma-separated TB codes, or `ALL` |
 
 The list behind `qShowTBs` lives in `https://webapp.etsi.org/Teddi/Menu.asp`.
-`TeddiClient.get_available_technical_bodies()` parses that menu and falls back to
-the bundled `TECHNICAL_BODY_CODES` when the page is unavailable.
+`TeddiClient.get_available_technical_bodies()` parses that menu through a
+dedicated cached client with a 90-day TTL (`TEDDI_MENU_CACHE_TTL`); there is no
+bundled fallback — if the menu cannot be fetched or parsed, the error
+propagates and the search aborts. Filter validation uses the live list, so
+new TEDDI codes work without a release.
 
 ### TB Grouping in Parser
 
@@ -141,8 +150,8 @@ command.
 
 ### New Search Filter
 
-1. Define/extend the enum in `src/teddi_tool/models.py` (or add new codes to
-   `TECHNICAL_BODY_CODES`)
+1. Define/extend the enum in `src/teddi_tool/models.py` (new technical-body
+   codes need no code change - TEDDI's menu list is fetched live)
 2. Add the field to `SearchRequest`
 3. Map it to a TEDDI form field in `src/teddi_tool/client.py`
 4. Expose the option in `src/teddi_tool/cli/args.py` and use it in

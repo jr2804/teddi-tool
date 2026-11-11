@@ -35,6 +35,10 @@ teddi search-term "QoS" --output toon
 | `--pattern`, `-p` | `alloccurrences` (default), `exactmatch`, `startingwith`, `endingwith` | `TEDDI_TOOL_PATTERN` |
 | `--technical-bodies`, `-t` | Comma-separated codes, case-insensitive; `all` clears the filter | `TEDDI_TOOL_TECHNICAL_BODIES` |
 | `--output`, `-o` | `table` (default), `json`, `ison`, `toon` | `TEDDI_TOOL_OUTPUT` |
+| `--cache-ttl` | Search cache lifetime in seconds (default `7200` = 2 h) | `TEDDI_TOOL_CACHE_TTL` |
+| `--menu-cache-ttl` | Technical-body menu cache lifetime in seconds (default `7776000` = 90 days) | `TEDDI_TOOL_MENU_CACHE_TTL` |
+
+Both TTL options are accepted by `search-term`, `list-bodies` and `server`.
 
 Exact-match searches are useful for abbreviations; `alloccurrences` also matches
 longer definitions that contain the term.
@@ -45,7 +49,8 @@ longer definitions that contain the term.
 teddi list-bodies
 ```
 
-Prints the 115 codes advertised by the TEDDI search form, for example:
+Prints the codes advertised by the TEDDI search form (fetched live, cached for
+90 days), for example:
 
 ```text
 Available Technical Bodies:
@@ -129,9 +134,28 @@ tool or CLI command.
 
 ## Caching
 
-Successful TEDDI responses are cached in `.cache/teddi_http.sqlite3` with a
-two-hour TTL. Delete that file (or pass a different `cache_dir` to the client) to
-force fresh requests. Failed responses are not cached; they surface as
+Successful TEDDI responses are cached in `.cache/teddi_http.sqlite3`. Search
+responses live for two hours by default and the technical-body menu for 90
+days; tune both with `--cache-ttl` / `--menu-cache-ttl` or the
+`TEDDI_TOOL_CACHE_TTL` / `TEDDI_TOOL_MENU_CACHE_TTL` environment variables.
+For the MCP server, set the environment variables in your client config:
+
+```json
+{
+  "mcpServers": {
+    "teddi-tool": {
+      "command": "teddi-mcp",
+      "env": {
+        "TEDDI_TOOL_CACHE_TTL": "3600",
+        "TEDDI_TOOL_MENU_CACHE_TTL": "604800"
+      }
+    }
+  }
+}
+```
+
+Delete the cache file (or pass a different `cache_dir` to the client) to force
+fresh requests. Failed responses are not cached; they surface as
 `httpx2.HTTPError`.
 
 ## Troubleshooting
@@ -140,6 +164,6 @@ force fresh requests. Failed responses are not cached; they surface as
   publish. Run `teddi list-bodies`; the error message lists all valid values.
 - **No results** — try `--pattern alloccurrences` (the default) or widen
   `--scope` to `both`; TEDDI only searches the term, not document text.
-- **Empty `list-bodies` output** — the menu page could not be fetched or parsed;
-  the client falls back to its bundled code list, so an empty result indicates a
-  broken installation rather than missing data.
+- **Empty `list-bodies` output** — cannot happen: the list comes from TEDDI's
+  menu page only (cached 90 days). If the menu cannot be fetched or parsed the
+  command raises `httpx2.HTTPError`/`ValueError` instead of printing nothing.

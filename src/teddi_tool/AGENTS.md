@@ -23,15 +23,23 @@ owns tooling and path inventories.
 - Search request shape (`src/teddi_tool/client.py:122`–`145`): `POST TEDDI_SEARCH_URL`
   (`https://webapp.etsi.org/Teddi/Main.asp`) with form fields `qWhatToSearch`, `qWhatOption`
   (from `SEARCH_IN_TO_PARAM`), `qWhereOption` (from `SEARCH_PATTERN_TO_PARAM`), `qShowTBs`
-  (comma-joined `TECHNICAL_BODY_CODES` values in TEDDI casing, `ALL` when the filter is `all`),
+  (comma-joined codes in TEDDI casing, `ALL` when the filter is `all` or empty),
   plus `btnSearch.x` / `btnSearch.y`.
 - `get_available_technical_bodies()` GETs `TEDDI_MENU_URL`
-  (`https://webapp.etsi.org/Teddi/Menu.asp`) and parses `select[name=qShowTBs` via
-  `parse_technical_bodies_page`; on HTTP/parse errors it falls back to the bundled
-  `TECHNICAL_BODY_CODES` (`src/teddi_tool/client.py:157`–`180`).
+  (`https://webapp.etsi.org/Teddi/Menu.asp`) and parses `select[name=qShowTBs]` via
+  `parse_technical_bodies_page` — no fallback list exists, HTTP/parse errors propagate
+  (`src/teddi_tool/client.py:157`–`180`). The menu client uses its own hishel cache with
+  a configurable TTL (`menu_cache_ttl`, default `TEDDI_MENU_CACHE_TTL` = 90 days), so the
+  code list survives long offline periods between releases. `execute_search` feeds this
+  list to `parse_technical_bodies`, so new TEDDI codes validate without a release; a
+  failed menu fetch aborts the search.
 - Cache contract (`src/teddi_tool/http_client.py:13`): hishel `AsyncSqliteStorage`,
-  `.cache/teddi_http.sqlite3` by default, `cache_ttl=7200` fixed at write time (hishel 2.x has no
-  refresh-on-access), 30 s timeout, browser User-Agent. There is no retry transport.
+  `.cache/teddi_http.sqlite3` by default, TTL fixed at write time (`cache_ttl`, default
+  `SEARCH_CACHE_TTL` = 2 h; hishel 2.x has no refresh-on-access), 30 s timeout, browser
+  User-Agent. There is no retry transport. Both TTLs are configurable end to end:
+  `TeddiClient`/`execute_search`/`execute_list_bodies` kwargs, CLI `--cache-ttl` /
+  `--menu-cache-ttl` (env `TEDDI_TOOL_CACHE_TTL` / `TEDDI_TOOL_MENU_CACHE_TTL`), and the
+  MCP server reads the same env vars in `main()`.
 - Parser (`src/teddi_tool/parser.py`): `parse_teddi_response(html)` returns `list[TermResult]`;
   an empty TB cell inherits the previous row's technical body; document sub-tables become
   `DocumentRef` entries.

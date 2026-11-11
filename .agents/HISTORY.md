@@ -46,6 +46,8 @@ Routine history lives in git; only record what is costly to rediscover.
 | 2026-11-11 | Replaced `httpx` with `httpx2` and hishel's `hishel.httpx2` adapter | The project should not depend on a library with unresponsive maintainers; `httpx2` is the pydantic-maintained continuation and hishel 2.0 ships a first-class adapter (`hishel[httpx2]`), so caching still works unchanged | `5d8ba1b` |
 | 2026-11-11 | Emit one `DocumentRef` per anchor in "Declared in document(s)" cells | TEDDI puts many specification links separated by `<br/>` into a single cell per technical body; the parser used `find("a")`, so table and JSON output showed only the first document | uncommitted |
 | 2026-11-11 | Technical-body filter now uses `TECHNICAL_BODY_CODES` and reads `Menu.asp`; scope/pattern form fields corrected | The enum only held `all`, so `list-bodies` was always empty and `-t` accepted one value; `qWhatOption`/`qWhereOption` were swapped and `startingwith`/`endingwith` mapped wrongly on the live site | `16103f4` |
+| 2026-11-11 | Removed bundled `TECHNICAL_BODY_CODES`; body codes come only from `Menu.asp`, cached 90 days (`TEDDI_MENU_CACHE_TTL`) | A bundled list drifts from TEDDI and forces releases for new codes; a 90-day menu cache is cheap and always current. Without a live list the search would fail anyway, so a fallback was obsolete | uncommitted |
+| 2026-11-11 | Made both cache TTLs configurable (search + technical-body menu): `TeddiClient` kwargs, `--cache-ttl`/`--menu-cache-ttl` CLI options, `TEDDI_TOOL_CACHE_TTL`/`TEDDI_TOOL_MENU_CACHE_TTL` env vars | Different deployments need different freshness trade-offs (e.g. short TTL for active research, long for offline stability); constants alone could not express that | uncommitted |
 
 ## Archived plans
 

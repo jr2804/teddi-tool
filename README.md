@@ -21,13 +21,15 @@ teddi search-term "QoS" --pattern exactmatch
   `list-bodies`, with table, JSON, ISON and TOON output.
 - **MCP server** — `search_teddi`, `get_term_info` and `list_technical_bodies`
   tools over stdio; no extra service to deploy.
-- **All 115 TEDDI technical bodies** — filters are matched case-insensitively and
-  validated against the codes published by the TEDDI search form.
-- **Local HTTP cache** — hishel/SQLite store with a two-hour TTL, so repeated
-  lookups do not hit ETSI.
+- **All TEDDI technical bodies** — filters are matched case-insensitively and
+  validated against the code list published by the TEDDI search form (fetched
+  live, cached for 90 days, so new codes need no release).
+- **Local HTTP cache** — hishel/SQLite store (2-hour search TTL, 90-day
+  technical-body menu TTL), so repeated lookups do not hit ETSI; both TTLs are
+  configurable.
 - **Typed core** — dataclasses and `StrEnum` enums with full annotations, plus a
   `TeddiSource` protocol that keeps the client mockable.
-- **Async-first** — a single `httpx2` client shared by the CLI and MCP server.
+- **Async-first** — an async `httpx2` core shared by the CLI and MCP server.
 
 ## Requirements
 
@@ -60,15 +62,17 @@ teddi search-term "QoS"                              # rich table (default)
 teddi search-term "QoS" --pattern exactmatch         # exact match
 teddi search-term "QoS" --scope definitions -o json  # definitions only, JSON
 teddi search-term "test" -t "3gpp,stq"               # filter technical bodies
-teddi list-bodies                                    # 115 valid TB codes
+teddi list-bodies                                    # valid TB codes from TEDDI
 teddi-mcp                                            # MCP server on stdio
 ```
 
 Scope values: `abbreviations`, `definitions`, `both` (default). Pattern values:
 `alloccurrences` (default), `exactmatch`, `startingwith`, `endingwith`. Output
-formats: `table`, `json`, `ison`, `toon`. Every option can also be set through
-`TEDDI_TOOL_SCOPE`, `TEDDI_TOOL_PATTERN`, `TEDDI_TOOL_TECHNICAL_BODIES` and
-`TEDDI_TOOL_OUTPUT`.
+formats: `table`, `json`, `ison`, `toon`. Cache lifetimes are tuned with
+`--cache-ttl`/`--menu-cache-ttl` (seconds). Every option can also be set through
+the `TEDDI_TOOL_` environment variables of the same name — `TEDDI_TOOL_SCOPE`,
+`TEDDI_TOOL_PATTERN`, `TEDDI_TOOL_TECHNICAL_BODIES`, `TEDDI_TOOL_OUTPUT`,
+`TEDDI_TOOL_CACHE_TTL` and `TEDDI_TOOL_MENU_CACHE_TTL`.
 
 `teddi-tool` and `teddi` are the same CLI; `teddi-cli` is an alias kept for
 existing scripts, and `teddi-mcp`/`teddi server` start the MCP server directly.
@@ -79,11 +83,18 @@ existing scripts, and `teddi-mcp`/`teddi server` start the MCP server directly.
 {
   "mcpServers": {
     "teddi": {
-      "command": "teddi-mcp"
+      "command": "teddi-mcp",
+      "env": {
+        "TEDDI_TOOL_CACHE_TTL": "3600",
+        "TEDDI_TOOL_MENU_CACHE_TTL": "604800"
+      }
     }
   }
 }
 ```
+
+The `env` block is optional; it tunes the search-response and technical-body
+menu cache lifetimes in seconds.
 
 ## Documentation
 
@@ -92,37 +103,7 @@ existing scripts, and `teddi-mcp`/`teddi server` start the MCP server directly.
 - [API reference](https://jr2804.github.io/teddi-tool/reference/api/) — models,
   client, parser
 - [Development](https://jr2804.github.io/teddi-tool/development/) — setup,
-  architecture, release process
-
-## Architecture
-
-| Module | Responsibility |
-|--------|----------------|
-| `src/teddi_tool/models.py` | Dataclasses, enums, and `TECHNICAL_BODY_CODES` |
-| `src/teddi_tool/client.py` | `TeddiClient` and the `TeddiSource` protocol |
-| `src/teddi_tool/http_client.py` | Cached `httpx2` client factory (hishel) |
-| `src/teddi_tool/parser.py` | TEDDI HTML parsing and TB grouping |
-| `src/teddi_tool/search_utils.py` | Shared search execution and output rendering |
-| `src/teddi_tool/cli/` | Cyclopts CLI (`app.py`, `commands.py`, `args.py`) |
-| `src/teddi_tool/server.py` | FastMCP server |
-
-## Development
-
-```bash
-mise install    # install the pinned toolchain
-mise dev        # sync all dependency groups
-mise test       # pytest with coverage
-mise all        # test, lint, spell, format, format-md, docs
-```
-
-Run `mise typecheck` separately; `mise all` does not include it. See
-[`docs/development.md`](docs/development.md) for the full task list and the
-release process. Area contracts live next to the code:
-
-- [`src/teddi_tool/AGENTS.md`](src/teddi_tool/AGENTS.md) — client, parser, CLI/MCP
-  surface
-- [`tests/AGENTS.md`](tests/AGENTS.md) — test conventions
-- [`.agents/ONBOARDING.md`](.agents/ONBOARDING.md) — entry points and commands
+  project layout, tasks and release process
 
 ## Contributing
 

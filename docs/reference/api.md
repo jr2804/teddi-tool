@@ -3,7 +3,7 @@
 The package exposes its public surface from `teddi_tool`:
 
 ```python
-from teddi_tool import SearchIn, SearchPattern, TeddiClient, TECHNICAL_BODY_CODES
+from teddi_tool import SearchIn, SearchPattern, TeddiClient
 ```
 
 ## Models (`teddi_tool.models`)
@@ -16,9 +16,10 @@ from teddi_tool import SearchIn, SearchPattern, TeddiClient, TECHNICAL_BODY_CODE
 | `SearchPattern` | `alloccurrences`, `exactmatch`, `startingwith`, `endingwith` |
 | `OutputFormat` | `table`, `json`, `ison`, `toon` |
 
-`TECHNICAL_BODY_CODES: tuple[str, ...]` holds the 115 codes advertised by the
-TEDDI search form (`3GPP`, `Ecma`, `eHEALTH`, `oneM2M`, `STQ`, …). Filter
-parsing accepts them case-insensitively and also accepts `all`.
+Technical-body codes are not bundled: the live list is fetched from the TEDDI
+menu page (`https://webapp.etsi.org/Teddi/Menu.asp`) through a client whose
+hishel cache uses a 90-day TTL. Filter parsing accepts codes
+case-insensitively against that list and also accepts `all`.
 
 ### Dataclasses
 
@@ -63,14 +64,18 @@ for result in response.results:
     print(result.term)
 ```
 
-- `TeddiClient(client: httpx2.AsyncClient | None = None, cache_dir: Path | None = None)`
-  — inject a client to bypass the cache; otherwise one is created on
-  `__aenter__` and closed on `__aexit__` (using `cache_dir` when given).
+- `TeddiClient(client: httpx2.AsyncClient | None = None, cache_dir: Path | None = None,`
+  `cache_ttl: int = SEARCH_CACHE_TTL, menu_cache_ttl: int = TEDDI_MENU_CACHE_TTL)`
+  — inject a client to bypass the cache; otherwise two cached clients (search:
+  `cache_ttl`, default 2 h; menu: `menu_cache_ttl`, default 90 days) are created
+  on `__aenter__` and closed on `__aexit__` (using `cache_dir` when given).
+  Non-positive TTLs raise `ValueError`.
 - `search_terms(request)` → `SearchResponse`; raises `ValueError` if the
   response cannot be parsed and `httpx2.HTTPError` on transport failures.
 - `get_available_technical_bodies()` → `list[str]`; reads
-  `https://webapp.etsi.org/Teddi/Menu.asp` and falls back to
-  `TECHNICAL_BODY_CODES` when the page cannot be fetched or parsed.
+  `https://webapp.etsi.org/Teddi/Menu.asp` through a client cached for 90 days
+  (`TEDDI_MENU_CACHE_TTL`). There is no fallback list: HTTP or parse errors
+  propagate.
 - `fetch_document(url)` → `bytes` — not exposed as a CLI command or MCP tool.
 
 ### Cached HTTP client (`teddi_tool.http_client`)
@@ -93,15 +98,18 @@ refresh-on-access. Timeout is 30 s and a browser User-Agent is sent.
 
 ## Output helpers (`teddi_tool.search_utils`)
 
-- `execute_search(term, search_scope, search_pattern, tb_filter_str)` — parse
+- `execute_search(term, search_scope, search_pattern, tb_filter_str, *,`
+  `cache_ttl=SEARCH_CACHE_TTL, menu_cache_ttl=TEDDI_MENU_CACHE_TTL)` — parse
   filters, query TEDDI, and return the `(SearchRequest, SearchResponse)` pair.
-- `execute_list_bodies()` → `list[str]` — technical bodies for `list-bodies`.
+- `execute_list_bodies(menu_cache_ttl=TEDDI_MENU_CACHE_TTL)` → `list[str]` —
+  technical bodies for `list-bodies`.
 - `build_results_payload(request, response)` / `serialize_payload(payload,
   format)` — structure and render results as JSON, ISON, or TOON.
 - `render_table(term, response)` — rich table for the CLI.
-- `parse_technical_bodies(value)` — normalise a comma-separated filter against
-  `TECHNICAL_BODY_CODES`; `all` becomes `["ALL"]`, unknown codes raise
-  `ValueError`.
+- `parse_technical_bodies(value, known_bodies)` - normalise a comma-separated
+  filter against `known_bodies` (the codes TEDDI currently advertises, from the
+  90-day-cached menu list). `all` becomes `["ALL"]`; unknown codes raise
+  `ValueError` listing the supported values.
 
 ### Result payload
 

@@ -15,8 +15,8 @@ interfaces that share one async client, parser and output layer:
 
 Requests go through a local SQLite cache (hishel) with a two-hour TTL, and the
 scraped HTML is parsed into typed `TermResult`/`DocumentRef` dataclasses. The
-technical-body filter accepts all 115 codes published by the TEDDI search form,
-case-insensitively.
+technical-body filter accepts the codes published by the TEDDI search form
+(fetched live and cached for 90 days), case-insensitively.
 
 ## Requirements
 
@@ -54,7 +54,7 @@ teddi search-term "QoS" --scope definitions --output json
 # Filter by technical bodies (codes are case-insensitive)
 teddi search-term "test" --technical-bodies "3gpp,stq"
 
-# List the 115 supported technical bodies
+# List the supported technical bodies
 teddi list-bodies
 
 # Start the MCP server on stdio
