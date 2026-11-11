@@ -5,74 +5,77 @@
 1. Clone the repository:
 
    ```bash
-   git clone https://forge.3gpp.org/rep/reimes/teddi-mcp.git
-   cd teddi-mcp
+   git clone https://github.com/jr2804/teddi-tool.git
+   cd teddi-tool
    ```
 
-2. Sync dependencies (Python 3.13+, `uv`):
+2. Install pinned tools and sync dependencies (Python 3.13+, `uv`, `mise`):
 
    ```bash
-   uv sync --all-extras
+   mise install     # toolchain from .config/mise/config.toml
+   mise dev         # uv sync -U --dev --all-extras --all-groups
    ```
 
-Development tools are pinned in `.config/mise/config.toml`; `mise install`
-sets up `uv`, `node`, `bun`, and the quality tools.
+## Tasks
 
-## Running Tests
+| Task | Purpose |
+|------|---------|
+| `mise dev` | Sync all dependency groups |
+| `mise test` | `pytest` with coverage |
+| `mise lint` | `ruff check src/ tests/ --fix --unsafe-fixes` |
+| `mise typecheck` | `ty check` |
+| `mise spell` | `codespell` |
+| `mise format` | `pyreorder`, `ruff format`, import sort |
+| `mise format-md` | `rumdl` over Markdown |
+| `mise docs` | Build the Zensical site |
+| `mise all` | Everything above, in order |
+
+Run a single test file directly:
 
 ```bash
-# Run all tests
-uv run pytest tests/ -v
-
-# Run with coverage
-uv run pytest tests/ --cov=teddi_mcp --cov-report=term-missing
-
-# Run specific test file
 uv run pytest tests/test_parser.py -v
 ```
 
-Tests never call TEDDI: they mock the `httpx` client (see
-`tests/test_client.py`).
+Tests never call TEDDI: they inject an `httpx.AsyncClient` with a mocked
+transport (see `tests/test_client.py`). Cache paths use the `cache_dir` fixture,
+never the repository `.cache/`.
 
 ## Code Quality
 
 ```bash
-# Format (undersort + ruff import sort + ruff format)
-mise run format
-
-# Lint
-uv run ruff check src/ tests/
+uv run ruff check src/ tests/          # lint only
 uv run ruff format --check src/ tests/
-
-# Type checking
 uv run ty check
-
-# Secrets/quality scan
-mise run analyze
 ```
+
+`ruff.toml` and `ty.toml` are the sources of truth; both target Python 3.13.
+`mise lint` applies fixes, so use `uv run ruff check` when you want a read-only
+check.
 
 ## Project Layout
 
-The package lives in `src/teddi_mcp/`; module-level contracts are documented
-in [`src/teddi_mcp/AGENTS.md`](../src/teddi_mcp/AGENTS.md) and test
-conventions in [`tests/AGENTS.md`](../tests/AGENTS.md). For a current file
-list, run `rg --files` instead of relying on a checked-in tree.
+The package lives in `src/teddi_tool/`; module-level contracts are documented
+in [`src/teddi_tool/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/src/teddi_tool/AGENTS.md)
+and test conventions in
+[`tests/AGENTS.md`](https://github.com/jr2804/teddi-tool/blob/main/tests/AGENTS.md).
+For a current file list, run `rg --files` instead of relying on a checked-in
+tree.
 
-Module overview:
-
-- `models.py` — Pydantic models and enums
-- `client.py` — `TeddiSource` protocol and `TeddiClient`
-- `parser.py` — TEDDI HTML parsing with TB grouping
-- `http_client.py` — hishel-cached async HTTP client
-- `search_utils.py` — shared search execution and output rendering
-- `cli.py`, `search_cli.py` — Typer entry points
-- `server.py` — FastMCP 3.0 server
+| Module | Responsibility |
+|--------|----------------|
+| `models.py` | Pydantic models and enums |
+| `client.py` | `TeddiSource` protocol and `TeddiClient` |
+| `parser.py` | TEDDI HTML parsing with TB grouping |
+| `http_client.py` | hishel-cached async HTTP client |
+| `search_utils.py` | Shared search execution and output rendering |
+| `cli/app.py`, `cli/commands.py`, `cli/args.py` | Cyclopts entry point, commands, option aliases |
+| `server.py` | FastMCP server |
 
 ## Key Design Patterns
 
 ### Protocol-Based Abstraction
 
-`TeddiSource` (`src/teddi_mcp/client.py`) is the seam between consumers and
+`TeddiSource` (`src/teddi_tool/client.py`) is the seam between consumers and
 TEDDI, which keeps the client mockable:
 
 ```python
@@ -89,7 +92,8 @@ class TeddiSource(Protocol):
 Requests go through `create_cached_teddi_async_client()`:
 
 - SQLite store: `.cache/teddi_http.sqlite3` (or the given `cache_dir`)
-- TTL: 2 hours, fixed when the entry is written
+- TTL: 2 hours, fixed when the entry is written (hishel 2.x has no
+  refresh-on-access)
 - 30 s timeout, browser User-Agent
 
 There is no retry transport; failed requests surface as `httpx.HTTPError`.
@@ -105,7 +109,7 @@ TEDDI results use nested tables. The parser handles TB inheritance:
 
 MCP tools and CLIs share the same execution path:
 
-- `search_teddi` / `search-term` / `term` — search with filters
+- `search_teddi` / `search-term` — search with filters
 - `list_technical_bodies` / `list-bodies` — list technical bodies
 
 `fetch_document()` exists on the client but is not exposed as a tool or
@@ -115,18 +119,58 @@ command.
 
 ### New Search Filter
 
-1. Define/extend the enum in `src/teddi_mcp/models.py`
+1. Define/extend the enum in `src/teddi_tool/models.py`
 2. Add the field to `SearchRequest`
-3. Map it to a TEDDI form field in `src/teddi_mcp/client.py`
-4. Expose it in `src/teddi_mcp/cli.py` and `src/teddi_mcp/search_cli.py`
-5. Expose it in the MCP tool in `src/teddi_mcp/server.py`
+3. Map it to a TEDDI form field in `src/teddi_tool/client.py`
+4. Expose the option in `src/teddi_tool/cli/args.py` and use it in
+   `src/teddi_tool/cli/commands.py`
+5. Expose it in the MCP tool in `src/teddi_tool/server.py`
 6. Add tests
+
+## Releasing
+
+Versions come from git tags (`uv-dynamic-versioning`), so no version string is
+edited by hand.
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+The tag triggers `.github/workflows/release.yml`:
+
+1. Build sdist and wheel with `uv build`.
+2. Generate release notes: `scripts/release_notes.py` summarizes the commits
+   since the previous tag with an OpenAI-compatible chat endpoint when
+   `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`, `OPENAI_MODEL`) is set;
+   otherwise the job falls back to GitHub's generated notes.
+3. Create the GitHub release with those notes.
+4. Publish to PyPI with `pypa/gh-action-pypi-publish` using OIDC trusted
+   publishing (no token stored). One-time setup: on PyPI, add a trusted
+   publisher for `jr2804/teddi-tool` with workflow `release.yml` and
+   environment `pypi`.
+
+Run the notes script locally with:
+
+```bash
+uv run python scripts/release_notes.py --from-tag v1.2.2
+```
+
+## Template Updates
+
+The project is generated from
+[copier-uv-plus](https://codeberg.org/jr2804/copier-uv-plus). Answers live in
+`.copier-answers.yml`; apply upstream changes with:
+
+```bash
+uvx --with copier-templates-extensions copier update --trust --defaults
+```
 
 ## Implementation Notes
 
 1. **TEDDI HTML-driven**: the search form was reverse-engineered; the parser
    may need updates if the TEDDI UI changes.
-2. **Async-first**: all client methods are `async`; Typer commands wrap them
-   with `asyncio.run()`.
+2. **Async-first**: all client methods are `async`; the Cyclopts command
+   wrappers call them via `asyncio.run()`.
 3. **Offline tests**: cache paths in tests are temporary (`cache_dir`
    fixture), never the repository `.cache/`.
