@@ -1,17 +1,5 @@
 [tasks.add-skills]
-run = [
-    "cls",
-    # python skills
-    "bun x skills add https://github.com/sickn33/antigravity-awesome-skills -a universal -y -s python-pro -s python-packaging -s python-testing-patterns",
+description = "Install agent skills for AI assistants (driven by data/dev-features.csv and skills.csv)"
+depends = ["dev"]
+run = "uv run .config/mise/scripts/install_dev_features.py add-skills"
 
-    # anti-AI hallucination skills
-    "bun x skills add https://github.com/alinaqi/claude-bootstrap -s code-deduplication -a universal -y",
-    "bun x skills add https://github.com/hardikpandya/stop-slop -a universal -y",
-
-    # development tool skills
-    "bun x skills add https://github.com/AlmogBaku/debug-skill -a universal -y", # for dab tool -> AlmogBaku/debug-skill
-    "bun x skills add https://github.com/s2005/uv-skill -a universal -y",
-
-    # skills for other tools
-    "bun x skills add https://github.com/nicobailon/visual-explainer -a universal -y",
-]

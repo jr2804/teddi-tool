@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.teddi_mcp.client import TeddiClient
-from src.teddi_mcp.models import SearchIn, SearchPattern, SearchRequest, TechnicalBody
+from src.teddi_tool.client import TeddiClient
+from src.teddi_tool.models import SearchIn, SearchPattern, SearchRequest, TechnicalBody
 
 
 @pytest.mark.asyncio
@@ -116,7 +116,7 @@ class TestTeddiClient:
 
     async def test_context_manager_usage(self) -> None:
         """Test using TeddiClient as async context manager."""
-        with patch("src.teddi_mcp.client.create_cached_teddi_async_client") as mock_create:
+        with patch("src.teddi_tool.client.create_cached_teddi_async_client") as mock_create:
             mock_client = AsyncMock()
             mock_response = AsyncMock(text="<table></table>")
             mock_response.raise_for_status = Mock()

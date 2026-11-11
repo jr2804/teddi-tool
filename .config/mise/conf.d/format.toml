@@ -1,11 +1,11 @@
 [tasks.format]
-description = "Format source code and tests"
+description = "Format code (ruff, isort, pyreorder)"
 run = [
-    "uv run undersort src/ tests/ --exclude .config/",
-    "uv run ruff check --select I --fix",                           # isort-equivalent sorting of imports
-    "uv run ruff format src/ tests/ --exclude .config",
+	"pyreorder run src/ tests/ scripts/ --config .config/pyreorder.toml",
+	"ruff format src/ tests/",
+	"ruff check src/ tests/ --select I --fix",
 ]
 
 [tasks.format-md]
-description = "Format Markdown files"
-run = "uvx --with mdformat-front-matters mdformat . --exclude .config/ --end-of-line keep --number"
+description = "Lint and reformat Markdown files with rumdl"
+run = "rumdl fmt --config .config/rumdl.toml src/ docs/ tests/ ./"

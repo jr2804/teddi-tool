@@ -7,7 +7,7 @@ import pytest
 from hishel import AsyncSqliteStorage
 from hishel.httpx import AsyncCacheClient
 
-from src.teddi_mcp.http_client import create_cached_teddi_async_client
+from src.teddi_tool.http_client import create_cached_teddi_async_client
 
 
 class TestCreateCachedTeddiAsyncClient:

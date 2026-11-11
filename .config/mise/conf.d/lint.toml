@@ -1,11 +1,15 @@
 [tasks.lint]
-description = "Lint source code and tests (no fixes)"
-run = "uv run ruff check src/ tests/"
+description = "Run linter (ruff) and apply safe and unsafe fixes"
+run = 'ruff check src/ tests/ --fix --unsafe-fixes'
 
-[tasks.lint-fix]
-description = "Lint source code and tests and fix safe issues"
-run = "uv run ruff check --fix src/ tests/"
+[tasks.lint-check]
+description = "Run linter (ruff) without applying fixes"
+run = 'ruff check src/ tests/'
 
-[tasks.lint-fix-unsafe]
-description = "Lint source code and tests and fix safe and unsafe issues"
-run = "uv run ruff check --fix --unsafe-fixes src/ tests/"
+[tasks.typecheck]
+description = "Run type checker (ty)"
+run = 'ty check src/ tests/'
+
+[tasks.spell]
+description = "Run spell checker (codespell)"
+run = "codespell src/ tests/"

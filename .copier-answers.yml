@@ -1,0 +1,24 @@
+# Changes here will be overwritten by Copier
+_commit: 2026.11.2
+_src_path: https://codeberg.org/jr2804/copier-uv-plus.git
+project_title: TEDDI Tool
+project_slug: teddi-tool
+package_slug: teddi_tool
+author: Jan Reimes
+author_email: jan.reimes@head-acoustics.com
+description: CLI and FastMCP server for the ETSI TEDDI terminology database
+repo_url: https://github.com/jr2804/teddi-tool
+license: MIT
+python_version: 3.13
+layout: src
+enable_cli: True
+enable_docs: True
+include_github_actions: True
+release_versioning: tag
+auto_setup_mise: False
+auto_sync_uv: skip
+include_format_tasks: True
+include_lint_tasks: True
+include_quality_tasks: True
+include_mcp_tasks: True
+feature_groups: coding,docs,tracking,codebase

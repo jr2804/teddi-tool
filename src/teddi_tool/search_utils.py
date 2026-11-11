@@ -10,8 +10,8 @@ from rich.console import Console
 from rich.table import Table
 from toon_format import encode as toon_encode
 
-from teddi_mcp.client import TeddiClient
-from teddi_mcp.models import (
+from teddi_tool.client import TeddiClient
+from teddi_tool.models import (
     OutputFormat,
     SearchIn,
     SearchPattern,

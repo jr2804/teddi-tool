@@ -6,15 +6,15 @@ from typing import Protocol
 
 import httpx
 
-from teddi_mcp.http_client import create_cached_teddi_async_client
-from teddi_mcp.models import (
+from teddi_tool.http_client import create_cached_teddi_async_client
+from teddi_tool.models import (
     SearchIn,
     SearchPattern,
     SearchRequest,
     SearchResponse,
     TechnicalBody,
 )
-from teddi_mcp.parser import parse_teddi_response
+from teddi_tool.parser import parse_teddi_response
 
 logger = logging.getLogger(__name__)
 

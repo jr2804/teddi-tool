@@ -1,6 +1,6 @@
 """Tests for Pydantic models and enums."""
 
-from src.teddi_mcp.models import (
+from src.teddi_tool.models import (
     DocumentRef,
     OutputFormat,
     SearchIn,

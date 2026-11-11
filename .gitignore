@@ -1,45 +1,85 @@
-# Byte-compiled / optimized / DLL files
+# Python-generated files
 __pycache__/
-*.py[cod]
+*.py[oc]
 *$py.class
-
-# Distribution / packaging
 build/
 dist/
-*.egg-info/
+wheels/
+*.egg-info
+.eggs/
+.installed.cfg
+
+# Coverage / test artifacts
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# Documentation build output (zensical / mkdocs)
+site/
+docs/_build/
+
+# Rust build artifacts (maturin/other native builds)
+target/
+
+# Native extension binaries
+*.so
+*.dll
+*.pyd
+*.dylib
+
+# Windows artifacts
+*.exe
+*.pdb
+nul
+
+# Logs
+*.log
 
 # Virtual environments
-.venv/
+.venv
 venv/
+*.env
 
-# IDE
+# Caches
+.cache/
+.ruff_cache/
+.mypy_cache/
+.ty/
+
+# OS / editors
+.DS_Store
+Thumbs.db
 .idea/
-.vscode/
 *.swp
 *.swo
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Cache
-.ruff_cache/
-.mypy_cache/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Local cache
-.cache/
-
-# Type checker
-.ty/
-
-uv.lock
-
+# Dev tools / MCP server data/dirs
+/.config/chunkhound/db
+.sisyphus
+.config/memorygraph/memory.db
+/.opencode
+.repowise/
+.grepai/
+.mcp.json
 opencode.json
+opencode.jsonc
+mcporter.json
+.pi/
+.codex/
+.claude/
+.opencode/
+.vscode/
+
+# Temp folders
+/.tmp
+/tmp
+/temp
+
+# Skills lock file
+skills-lock.json
 
 # Keep .agents/ DOX .md files tracked (override any blanket ignore)
 # State files, their detail subdirectories, and history stay versioned;
@@ -55,3 +95,6 @@ opencode.json
 
 # Implementation plans — mutable working artifacts, never committed
 /.agents/plans/
+
+# Local overrides
+mise.local.toml

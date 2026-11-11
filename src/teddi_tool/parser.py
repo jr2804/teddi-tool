@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup, Tag
 
-from teddi_mcp.models import DocumentRef, TermResult
+from teddi_tool.models import DocumentRef, TermResult
 
 logger = logging.getLogger(__name__)
 

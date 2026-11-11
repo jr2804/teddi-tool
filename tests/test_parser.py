@@ -1,6 +1,6 @@
 """Tests for HTML parsing of TEDDI responses."""
 
-from src.teddi_mcp.parser import parse_teddi_response
+from src.teddi_tool.parser import parse_teddi_response
 
 
 class TestParseTermResult:

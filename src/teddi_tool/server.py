@@ -5,14 +5,14 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from teddi_mcp.client import TeddiClient
-from teddi_mcp.models import SearchIn, SearchPattern, SearchRequest
-from teddi_mcp.search_utils import build_results_payload, parse_technical_bodies
+from teddi_tool.client import TeddiClient
+from teddi_tool.models import SearchIn, SearchPattern, SearchRequest
+from teddi_tool.search_utils import build_results_payload, parse_technical_bodies
 
 logger = logging.getLogger(__name__)
 
 # Create FastMCP server
-server = FastMCP("teddi-mcp")
+server = FastMCP("teddi-tool")
 
 
 @server.tool

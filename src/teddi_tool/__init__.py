@@ -1,8 +1,10 @@
-"""TEDDI-MCP: FastMCP 3.0 server for ETSI TEDDI search integration."""
+"""TEDDI Tool: CLI and FastMCP server for ETSI TEDDI search."""
 
-from teddi_mcp.client import TeddiClient, TeddiSource
-from teddi_mcp.models import (
+from teddi_tool.__about__ import __version__
+from teddi_tool.client import TeddiClient, TeddiSource
+from teddi_tool.models import (
     DocumentRef,
+    OutputFormat,
     SearchIn,
     SearchPattern,
     SearchRequest,
@@ -11,9 +13,9 @@ from teddi_mcp.models import (
     TermResult,
 )
 
-__version__ = "0.1.0"
 __all__ = [
     "DocumentRef",
+    "OutputFormat",
     "SearchIn",
     "SearchPattern",
     "SearchRequest",
@@ -22,4 +24,5 @@ __all__ = [
     "TeddiClient",
     "TeddiSource",
     "TermResult",
+    "__version__",
 ]
