@@ -129,31 +129,34 @@ command.
 
 ## Releasing
 
-Versions come from git tags (`uv-dynamic-versioning`), so no version string is
-edited by hand.
+Versions are CalVer: `YYYY.MM.N` (e.g. `2026.11.1`), where `N` counts releases
+within the month. Versions come from git tags (`uv-dynamic-versioning`), so no
+version string is edited by hand.
 
-```bash
-git tag v1.2.3
-git push origin v1.2.3
-```
+Every push to `main` triggers `.github/workflows/release.yml`:
 
-The tag triggers `.github/workflows/release.yml`:
-
-1. Build sdist and wheel with `uv build`.
-2. Generate release notes: `scripts/release_notes.py` summarizes the commits
+1. Run the test suite on the commit; a failing build stops the release.
+2. Compute the next calendar version and create the annotated tag when HEAD is
+   not tagged yet.
+3. Build sdist and wheel with `uv build` (the version comes from the new tag).
+4. Generate release notes: `scripts/release_notes.py` summarizes the commits
    since the previous tag with an OpenAI-compatible chat endpoint when
    `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`, `OPENAI_MODEL`) is set;
-   otherwise the job falls back to GitHub's generated notes.
-3. Create the GitHub release with those notes.
-4. Publish to PyPI with `pypa/gh-action-pypi-publish` using OIDC trusted
+   otherwise the job falls back to a plain commit list.
+5. Create the GitHub release named after the version.
+6. Publish to PyPI with `pypa/gh-action-pypi-publish` using OIDC trusted
    publishing (no token stored). One-time setup: on PyPI, add a trusted
    publisher for `jr2804/teddi-tool` with workflow `release.yml` and
    environment `pypi`.
 
+To release a commit that was already pushed without a version bump, re-run the
+workflow from the Actions tab (`workflow_dispatch`). A commit whose tag already
+exists is not published twice.
+
 Run the notes script locally with:
 
 ```bash
-uv run python scripts/release_notes.py --from-tag v1.2.2
+uv run python scripts/release_notes.py --from-tag 2026.11.1
 ```
 
 ## Template Updates

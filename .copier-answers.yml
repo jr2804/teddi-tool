@@ -14,7 +14,7 @@ layout: src
 enable_cli: True
 enable_docs: True
 include_github_actions: True
-release_versioning: tag
+release_versioning: calendar
 auto_setup_mise: False
 auto_sync_uv: skip
 include_format_tasks: True
