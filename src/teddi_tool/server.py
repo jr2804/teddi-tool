@@ -1,4 +1,4 @@
-"""FastMCP 3.0 server for TEDDI search."""
+"""FastMCP server for TEDDI search."""
 
 import logging
 from typing import Any

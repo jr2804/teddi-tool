@@ -44,6 +44,12 @@ mise format-md     # rumdl over Markdown
 mise docs          # build the Zensical documentation
 ```
 
+`mise all` covers style and documentation, but not static typing; run
+`mise typecheck` as well before opening a pull request (CI runs it separately).
+
+See the [Development guide](development.md) for architecture notes and the
+release process.
+
 ### Pull Requests
 
 1. Fork the repository

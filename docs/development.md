@@ -21,14 +21,19 @@
 | Task | Purpose |
 |------|---------|
 | `mise dev` | Sync all dependency groups |
-| `mise test` | `pytest` with coverage |
+| `mise test` | `pytest --cov=teddi_tool` |
 | `mise lint` | `ruff check src/ tests/ --fix --unsafe-fixes` |
-| `mise typecheck` | `ty check` |
-| `mise spell` | `codespell` |
+| `mise lint-check` | `ruff check src/ tests/` without fixes |
+| `mise typecheck` | `ty check src/ tests/` |
+| `mise spell` | `codespell src/ tests/` |
 | `mise format` | `pyreorder`, `ruff format`, import sort |
 | `mise format-md` | `rumdl` over Markdown |
 | `mise docs` | Build the Zensical site |
-| `mise all` | Everything above, in order |
+| `mise release-notes` | Generate notes for the latest tag |
+| `mise clean` | Remove build artefacts and caches |
+| `mise all` | `test`, `lint`, `spell`, `format`, `format-md`, `docs` |
+
+`mise all` does not run `mise typecheck`; run it in the same pass (CI does).
 
 Run a single test file directly:
 
@@ -36,21 +41,23 @@ Run a single test file directly:
 uv run pytest tests/test_parser.py -v
 ```
 
-Tests never call TEDDI: they inject an `httpx2.AsyncClient` with a mocked
-transport (see `tests/test_client.py`). Cache paths use the `cache_dir` fixture,
-never the repository `.cache/`.
+Tests never call TEDDI. Client tests inject an `AsyncMock` in place of
+`httpx2.AsyncClient` (see `tests/test_client.py`); `tests/test_http_client.py`
+inspects the cache factory's storage, timeout and headers instead of performing
+requests. Cache paths use the `cache_dir` fixture, never the repository
+`.cache/`.
 
 ## Code Quality
 
 ```bash
 uv run ruff check src/ tests/          # lint only
 uv run ruff format --check src/ tests/
-uv run ty check
+uv run ty check src/ tests/
 ```
 
 `ruff.toml` and `ty.toml` are the sources of truth; both target Python 3.13.
-`mise lint` applies fixes, so use `uv run ruff check` when you want a read-only
-check.
+`mise lint` applies fixes, so use `mise lint-check` (or the `uv run` command
+above) when you want a read-only check.
 
 ## Project Layout
 
@@ -63,10 +70,10 @@ tree.
 
 | Module | Responsibility |
 |--------|----------------|
-| `models.py` | Pydantic models and enums |
+| `models.py` | Dataclasses, `StrEnum` enums and `TECHNICAL_BODY_CODES` |
 | `client.py` | `TeddiSource` protocol and `TeddiClient` |
 | `parser.py` | TEDDI HTML parsing with TB grouping |
-| `http_client.py` | hishel-cached async HTTP client |
+| `http_client.py` | hishel-cached `httpx2` client factory |
 | `search_utils.py` | Shared search execution and output rendering |
 | `cli/app.py`, `cli/commands.py`, `cli/args.py` | Cyclopts entry point, commands, option aliases |
 | `server.py` | FastMCP server |
@@ -98,6 +105,21 @@ Requests go through `create_cached_teddi_async_client()`:
 
 There is no retry transport; failed requests surface as `httpx2.HTTPError`.
 
+### TEDDI Search Form
+
+Search submits a form to `https://webapp.etsi.org/Teddi/Main.asp`:
+
+| Field | Meaning |
+|-------|---------|
+| `qWhatToSearch` | Search term |
+| `qWhatOption` | Scope: `1` abbreviations, `2` definitions, `3` both |
+| `qWhereOption` | Pattern: `1` exact, `2` all occurrences, `3` starting with, `4` ending with |
+| `qShowTBs` | Comma-separated TB codes, or `ALL` |
+
+The list behind `qShowTBs` lives in `https://webapp.etsi.org/Teddi/Menu.asp`.
+`TeddiClient.get_available_technical_bodies()` parses that menu and falls back to
+the bundled `TECHNICAL_BODY_CODES` when the page is unavailable.
+
 ### TB Grouping in Parser
 
 TEDDI results use nested tables. The parser handles TB inheritance:
@@ -119,7 +141,8 @@ command.
 
 ### New Search Filter
 
-1. Define/extend the enum in `src/teddi_tool/models.py`
+1. Define/extend the enum in `src/teddi_tool/models.py` (or add new codes to
+   `TECHNICAL_BODY_CODES`)
 2. Add the field to `SearchRequest`
 3. Map it to a TEDDI form field in `src/teddi_tool/client.py`
 4. Expose the option in `src/teddi_tool/cli/args.py` and use it in

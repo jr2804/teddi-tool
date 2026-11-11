@@ -63,9 +63,9 @@ for result in response.results:
     print(result.term)
 ```
 
-- `TeddiClient(client: httpx2.AsyncClient | None = None)` — inject a client to
-  bypass the cache; otherwise one is created on `__aenter__` and closed on
-  `__aexit__`.
+- `TeddiClient(client: httpx2.AsyncClient | None = None, cache_dir: Path | None = None)`
+  — inject a client to bypass the cache; otherwise one is created on
+  `__aenter__` and closed on `__aexit__` (using `cache_dir` when given).
 - `search_terms(request)` → `SearchResponse`; raises `ValueError` if the
   response cannot be parsed and `httpx2.HTTPError` on transport failures.
 - `get_available_technical_bodies()` → `list[str]`; reads
@@ -86,22 +86,48 @@ refresh-on-access. Timeout is 30 s and a browser User-Agent is sent.
 - `parse_teddi_response(html) -> list[TermResult]` parses the nested results
   tables. Empty technical-body cells inherit the previous row's TB; document
   sub-tables become `DocumentRef` entries. Local links are resolved to absolute
-  TEDDI URLs.
+  TEDDI URLs. Returns an empty list when the page has no results table.
 - `parse_technical_bodies_page(html) -> list[str]` reads
   `select[name=qShowTBs]`, dropping the `ALL` sentinel and empty options; raises
   `ValueError` when the select is missing.
 
 ## Output helpers (`teddi_tool.search_utils`)
 
-- `execute_search(term, scope, pattern, technical_bodies)` — parse filters,
-  query TEDDI, and return a `SearchResponse`.
+- `execute_search(term, search_scope, search_pattern, tb_filter_str)` — parse
+  filters, query TEDDI, and return the `(SearchRequest, SearchResponse)` pair.
 - `execute_list_bodies()` → `list[str]` — technical bodies for `list-bodies`.
 - `build_results_payload(request, response)` / `serialize_payload(payload,
   format)` — structure and render results as JSON, ISON, or TOON.
-- `render_table(response)` — rich table for the CLI.
+- `render_table(term, response)` — rich table for the CLI.
 - `parse_technical_bodies(value)` — normalise a comma-separated filter against
   `TECHNICAL_BODY_CODES`; `all` becomes `["ALL"]`, unknown codes raise
   `ValueError`.
+
+### Result payload
+
+`build_results_payload()` returns the structure used by JSON, ISON, TOON and the
+MCP tools:
+
+```json
+{
+  "query": {
+    "term": "QoS",
+    "search_in": "both",
+    "search_pattern": "exactmatch",
+    "technical_bodies": ["STQ"]
+  },
+  "total_count": 2,
+  "results": [
+    {
+      "term": "QoS",
+      "description": "Quality of Service",
+      "documents": [
+        {"technical_body": "STQ", "specification": "TS 102 894-2", "url": "https://..."}
+      ]
+    }
+  ]
+}
+```
 
 ## MCP server (`teddi_tool.server`)
 

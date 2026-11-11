@@ -1,4 +1,4 @@
-"""Pydantic data models and enums for TEDDI search integration."""
+"""Dataclasses and enums for TEDDI search integration."""
 
 from dataclasses import dataclass
 from enum import StrEnum

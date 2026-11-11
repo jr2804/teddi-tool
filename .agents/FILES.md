@@ -13,12 +13,12 @@ Kept compact — agents hallucinate less when they know where definitions live.
 
 | What | Where | Key names |
 |------|-------|-----------|
-| Pydantic models & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `OutputFormat`, `TECHNICAL_BODY_CODES`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
+| Dataclasses & enums | `src/teddi_tool/models.py` | `SearchIn`, `SearchPattern`, `OutputFormat`, `TECHNICAL_BODY_CODES`, `SearchRequest`, `SearchResponse`, `TermResult`, `DocumentRef` |
 | TEDDI endpoint URL | `src/teddi_tool/client.py:21` | `TEDDI_SEARCH_URL` = `https://webapp.etsi.org/Teddi/Main.asp` |
 | Enum → TEDDI form values | `src/teddi_tool/client.py:24`–`35` | `SEARCH_IN_TO_PARAM`, `SEARCH_PATTERN_TO_PARAM` |
 | TEDDI form field names | `src/teddi_tool/client.py:124`–`140` | `qWhatToSearch`, `qWhereOption`, `qWhatOption`, `qShowTBs` |
 | HTTP session + cache | `src/teddi_tool/http_client.py:13` | `create_cached_teddi_async_client(cache_dir=None, cache_ttl=7200)`; DB `.cache/teddi_http.sqlite3` |
-| HTML → models | `src/teddi_tool/parser.py:17` | `parse_teddi_response(html_content)` |
+| HTML → models | `src/teddi_tool/parser.py:17` | `parse_teddi_response(html_content)`; one `DocumentRef` per anchor, so cells with several links yield several documents |
 | Source protocol / client | `src/teddi_tool/client.py:38`, `:75` | `TeddiSource`, `TeddiClient` |
 | Shared search + output | `src/teddi_tool/search_utils.py` | `execute_search`, `execute_list_bodies`, `build_results_payload`, `parse_technical_bodies`, `serialize_payload`, `render_table` |
 | Shared CLI options | `src/teddi_tool/cli/args.py` | `TermArgument`, `ScopeOption`, `PatternOption`, `TechnicalBodiesOption`, `OutputOption` |
