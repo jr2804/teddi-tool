@@ -98,3 +98,4 @@ skills-lock.json
 
 # Local overrides
 mise.local.toml
+uv.lock
