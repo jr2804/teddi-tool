@@ -58,10 +58,8 @@ def parse_teddi_response(html_content: str) -> list[TermResult]:
         html_content: Raw HTML response from TEDDI search endpoint.
 
     Returns:
-        List of TermResult objects parsed from HTML.
-
-    Raises:
-        ValueError: If HTML structure cannot be parsed.
+        List of TermResult objects parsed from HTML; empty when the page has no
+        results table.
     """
     soup = BeautifulSoup(html_content, "html.parser")
 
@@ -122,8 +120,8 @@ def _extract_results(table: Tag) -> list[TermResult]:
         if len(cells) < 3:
             continue
 
-        term_cell = cells[0].get_text(strip=True)
-        description_cell = cells[1].get_text(strip=True)
+        term_cell = _clean_text(cells[0])
+        description_cell = _clean_text(cells[1])
 
         # Skip the header row if it was included
         if term_cell.lower() == "term" and description_cell.lower() == "description":
@@ -173,29 +171,45 @@ def _parse_document_table(cell_content: Tag) -> list[DocumentRef]:
             continue
 
         # First cell may contain TB name or be empty
-        tb_cell = cells[0].get_text(strip=True)
+        tb_cell = _clean_text(cells[0])
         if tb_cell:
             last_tb = tb_cell
 
-        # Second cell contains link or is empty
-        link = cells[1].find("a")
-        if not link:
+        # Second cell may contain one or more document links
+        links = cells[1].find_all("a")
+        if not links:
             # No link in this row, skip
             continue
 
-        spec_text = link.get_text(strip=True)
-        if not spec_text:
-            continue
+        for link in links:
+            spec_text = _clean_text(link)
+            if not spec_text:
+                continue
 
-        documents.append(
-            DocumentRef(
-                technical_body=last_tb,
-                specification=spec_text,
-                url=_resolve_url(link),
+            documents.append(
+                DocumentRef(
+                    technical_body=last_tb,
+                    specification=spec_text,
+                    url=_resolve_url(link),
+                )
             )
-        )
 
     return documents
+
+
+def _clean_text(element: Tag) -> str:
+    """Return element text with tag boundaries and whitespace normalised.
+
+    ``<br>`` separators and adjacent inline tags are rendered as a single
+    space, so words from different nodes never run together.
+
+    Args:
+        element: Cell or anchor element to read.
+
+    Returns:
+        Whitespace-normalised text content.
+    """
+    return " ".join(element.get_text(" ", strip=True).split())
 
 
 def _resolve_url(link: Tag) -> str:

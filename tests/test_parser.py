@@ -33,6 +33,55 @@ class TestParseTermResult:
         assert results[0].documents[0].technical_body == "3GPP"
         assert results[0].documents[0].specification == "TS 24.008"
 
+    def test_parse_normalises_inline_markup(self) -> None:
+        """Test that br tags and spacing in cells do not merge words."""
+        html = """
+        <table>
+            <tr><th>Term</th><th>Description</th><th>Declared in document(s)</th></tr>
+            <tr>
+                <td>HATS</td>
+                <td>Head and torso<br>   simulator (HATS)</td>
+                <td>
+                    <table>
+                        <tr><td>STQ</td><td><a href="/specs/eg-201-377-2">EG 201 377-2</a></td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        """
+        results = parse_teddi_response(html)
+
+        assert results[0].description == "Head and torso simulator (HATS)"
+
+    def test_parse_multiple_links_in_one_cell(self) -> None:
+        """Test that several document links in one cell become separate entries."""
+        html = """
+        <table>
+            <tr><th>Term</th><th>Description</th><th>Declared in document(s)</th></tr>
+            <tr>
+                <td>HATS</td>
+                <td>Head and torso simulator</td>
+                <td>
+                    <table>
+                        <tr><td>STQ</td><td><br/>
+                            <a href="/specs/es-202-738-131">ES 202 738 V1.3.1</a><br/>
+                            <a href="/specs/es-202-738-132">ES 202 738 V1.3.2</a><br/>
+                        </td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        """
+        results = parse_teddi_response(html)
+
+        assert len(results[0].documents) == 2
+        assert [doc.specification for doc in results[0].documents] == [
+            "ES 202 738 V1.3.1",
+            "ES 202 738 V1.3.2",
+        ]
+        assert all(doc.technical_body == "STQ" for doc in results[0].documents)
+        assert results[0].documents[1].url == "https://webapp.etsi.org/specs/es-202-738-132"
+
     def test_parse_result_with_tb_grouping(self) -> None:
         """Test TB grouping: empty TB cells inherit from previous."""
         html = """
