@@ -43,8 +43,7 @@ If this file grows past its size budget, split detail into
 
 | Skill | When | Purpose |
 | ----- | ---- | ------- |
-| `cli-teddi` (`skills/cli-teddi/SKILL.md`) | Terminal TEDDI searches | `uv run teddi-tool search-term|list-bodies` recipes and filters |
-| `mcp-teddi` (`skills/mcp-teddi/SKILL.md`) | MCP-client TEDDI lookups | Tool arguments, TB filtering, multi-definition behaviour |
+| `teddi` (`skills/teddi/SKILL.md`) | TEDDI searches via CLI or MCP | Commands, options, MCP tools, result interpretation |
 
 ## Project scripts & tasks
 

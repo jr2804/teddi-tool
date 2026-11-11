@@ -42,7 +42,7 @@ src/ tests/`, `uv run ty check`.
 - `docs/` — `index.md`, `usage.md`, `reference/api.md`, `development.md`
 - `.agents/TOOLS.md` — tools, MCP servers, skills, CLIs in use
 - `.agents/HISTORY.md` — past decisions and rationale
-- `skills/cli-teddi/SKILL.md`, `skills/mcp-teddi/SKILL.md` — task-level usage recipes
+- `skills/teddi/SKILL.md` — task-level usage recipes for CLI and MCP
 
 ## Executables
 

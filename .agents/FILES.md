@@ -33,7 +33,7 @@ Kept compact — agents hallucinate less when they know where definitions live.
 | Release automation | `.github/workflows/{ci,docs,release}.yml`, `scripts/release_notes.py` | CI matrix, Pages deploy, tag release + PyPI trusted publishing, LLM notes |
 | Project version | `src/teddi_tool/__about__.py`, git tag | dynamic versioning (`uv-dynamic-versioning`) |
 | Docs site | `zensical.toml`, `docs/` | nav, site URL, mkdocstrings config |
-| Project skills | `skills/cli-teddi/SKILL.md`, `skills/mcp-teddi/SKILL.md` | — |
+| Project skill | `skills/teddi/SKILL.md` | Combined CLI + MCP usage for TEDDI search |
 | User docs | `docs/index.md`, `docs/usage.md`, `docs/reference/api.md`, `docs/development.md` | — |
 
 ## Subdirectory
