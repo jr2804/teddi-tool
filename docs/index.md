@@ -1,5 +1,7 @@
 # TEDDI Tool
 
+![TEDDI Tool — search the ETSI TEDDI terminology database from the command line or through an MCP server](assets/teddi-tool-hero.jpg)
+
 Search the [ETSI TEDDI](https://webapp.etsi.org/Teddi/) terminology database from
 the command line or through an MCP server for AI agents.
 

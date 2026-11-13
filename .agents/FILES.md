@@ -35,6 +35,7 @@ Kept compact — agents hallucinate less when they know where definitions live.
 | Docs site | `zensical.toml`, `docs/` | nav, site URL, mkdocstrings config |
 | Project skill | `skills/teddi/SKILL.md` | Combined CLI + MCP usage for TEDDI search |
 | User docs | `docs/index.md`, `docs/usage.md`, `docs/reference/api.md`, `docs/development.md` | — |
+| Docs assets | `docs/assets/` | Banner images: `teddi-tool-banner.jpg` (README), `teddi-tool-hero.jpg` (landing page) |
 
 ## Subdirectory
 

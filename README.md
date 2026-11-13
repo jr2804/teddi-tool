@@ -1,5 +1,7 @@
 # TEDDI Tool
 
+![TEDDI Tool — search the ETSI TEDDI terminology database from the terminal or over MCP](docs/assets/teddi-tool-banner.jpg)
+
 [![PyPI](https://img.shields.io/pypi/v/teddi-tool.svg)](https://pypi.org/project/teddi-tool/)
 [![Python](https://img.shields.io/pypi/pyversions/teddi-tool.svg)](https://pypi.org/project/teddi-tool/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
